@@ -16,9 +16,9 @@ pub static mut CURSOR_X: u32 = 0;
 pub static mut CURSOR_Y: u32 = 0;
 pub static CURSOR_HEIGHT: u32 = 16;
 pub static CURSOR_WIDTH: u32 = 8;
-pub static mut CURSOR_COLOR: u32 = 0x000000FF;
+pub static mut CURSOR_COLOR: u32 = 0x00FFFFFF;
 pub static mut FG_COLOR: u32 = 0x00FFFFFF;
-pub static mut BG_COLOR: u32 = 0xF0000000;
+pub static mut BG_COLOR: u32 = 0x00B24A09;
 pub static mut CURSOR_BUFFER: [u32, ..8*16] = [0x00FF0000, ..8*16];
 pub static mut SAVE_X: u32 = 0;
 pub static mut SAVE_Y: u32 = 0;
@@ -68,9 +68,9 @@ pub unsafe fn init(width: u32, height: u32)
 	ws(0x10120018, 0x82B);
 
     }
-    set_bg(0x222C38);
-    set_fg(0xFAFCFF);
-    set_cursor_color(0xFAFCFF);
+    set_bg(BG_COLOR);
+    set_fg(FG_COLOR);
+    set_cursor_color(CURSOR_COLOR);
     fill_bg();	
     sgash::drawstr(&"sgash > ");
     draw_cursor();
@@ -97,6 +97,7 @@ pub unsafe fn scrollup()
     CURSOR_X = 0x0u32;
     CURSOR_Y -= CURSOR_HEIGHT;
 }
+
 pub unsafe fn draw_char(c: char)
 {
     if CURSOR_X+(SCREEN_WIDTH*CURSOR_Y) >= SCREEN_WIDTH*SCREEN_HEIGHT
