@@ -297,6 +297,9 @@ impl cstr {
 		let mut selfp: uint = self.p as uint;
 		let mut s = cstr::new(256);
 		loop {
+            if (self.len() == 0) {
+                return None;
+            }
 			if (*(selfp as *char) == '\0') { 
 				// End of string
 				if (found) { return Some(s); }
