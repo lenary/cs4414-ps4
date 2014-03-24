@@ -31,14 +31,9 @@ fn putstr(msg: &str) {
 }
 
 pub unsafe fn drawstr(msg: &str) {
-    let old_fg = super::super::io::FG_COLOR;
-    let mut x: u32 = 0x6699FF99;
     for c in slice::iter(as_bytes(msg)) {
-        x = (x << 4) + (x >> 24); 
-        super::super::io::set_fg(x);
         drawchar(*c as char);
     }
-    super::super::io::set_fg(old_fg);
 }
 
 pub unsafe fn putcstr(s: cstr)
