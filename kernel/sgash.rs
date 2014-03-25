@@ -8,6 +8,9 @@ use kernel::*;
 use super::super::platform::*;
 use kernel::memory::Allocator;
 
+// Use this in prompt() when merged
+pub static PROMPT_COLOR: u32 = 0xFFAF00;
+
 pub fn putchar(key: char) {
     unsafe {
         /*
@@ -26,14 +29,9 @@ fn putstr(msg: &str) {
 }
 
 pub unsafe fn drawstr(msg: &str) {
-    let old_fg = super::super::io::FG_COLOR;
-    let mut x: u32 = 0x6699AAFF;
     for c in slice::iter(as_bytes(msg)) {
-        x = (x << 8) + (x >> 24);
-        super::super::io::set_fg(x);
         drawchar(*c as char);
     }
-    super::super::io::set_fg(old_fg);
 }
 
 unsafe fn drawchar(x: char) {
