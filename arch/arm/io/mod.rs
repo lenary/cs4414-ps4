@@ -29,6 +29,9 @@ pub static START_ADDR: u32 = 1024*1024;
 pub static mut SCREEN_WIDTH: u32 = 0;
 pub static mut SCREEN_HEIGHT: u32 = 0;
 
+// Draw all the chars upside down.
+static UPSIDE_DOWN : bool = false;
+
 pub unsafe fn init(width: u32, height: u32)
 {
     SCREEN_WIDTH = width;
@@ -118,7 +121,9 @@ pub unsafe fn draw_char(c: char)
         {
             //let addr = START_ADDR + 4*(CURSOR_X + CURSOR_WIDTH - i + SCREEN_WIDTH*(CURSOR_Y + j));
             //let addr = START_ADDR + 4*(CURSOR_X + CURSOR_WIDTH + SCREEN_WIDTH*CURSOR_Y) - 4*i + 4*SCREEN_WIDTH*j
-            if ((map[j] >> 4*i) & 1) == 1
+            
+            let map_loc = if !UPSIDE_DOWN { j } else { 15-j };
+            if ((map[map_loc] >> 4*i) & 1) == 1
             {
                 *(addr as *mut u32) = FG_COLOR;
             }
