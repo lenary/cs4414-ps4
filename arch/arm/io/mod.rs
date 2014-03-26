@@ -74,9 +74,6 @@ pub unsafe fn init(width: u32, height: u32)
     set_fg(0x79DF51);
     set_cursor_color(0xFFFFFF);
     fill_bg();
-
-    sgash::init();
-
     draw_cursor();
 
     sgash::init();

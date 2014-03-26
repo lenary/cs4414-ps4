@@ -8,8 +8,7 @@ use kernel::*;
 use super::super::platform::*;
 use kernel::memory::Allocator;
 
-// Use this in prompt() when merged
-pub static PROMPT_COLOR: u32 = 0xFFAF00;
+static PROMPT_COLOR: u32 = 0xFFAF00;
 
 pub fn putchar(key: char) {
     unsafe {
@@ -136,6 +135,10 @@ pub unsafe fn init() {
 
 pub unsafe fn prompt(preline: bool) {
     putstr(&"sgash> ");
+    
+    let prev_c = super::super::io::FG_COLOR;
+    super::super::io::set_fg(PROMPT_COLOR);
     drawstr(&"sgash> ");
+    super::super::io::set_fg(prev_c);
 }
 
