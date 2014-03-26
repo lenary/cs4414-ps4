@@ -19,10 +19,10 @@ pub static mut CURSOR_Y: u32 = 0;
 pub static CURSOR_HEIGHT: u32 = 16;
 pub static CURSOR_WIDTH: u32 = 8;
 // Colors have their own setters
-pub static mut CURSOR_COLOR: u32 = 0x00000000;
-pub static mut FG_COLOR: u32 = 0x00000000;
-pub static mut BG_COLOR: u32 = 0x00000000;
-pub static mut CURSOR_BUFFER: [u32, ..8*16] = [0x00FF0000, ..8*16];
+pub static mut CURSOR_COLOR: u32 = 0x00FFFFFF;
+pub static mut FG_COLOR: u32 = 0x00FFFFFF;
+pub static mut BG_COLOR: u32 = 0xF0000000;
+pub static mut CURSOR_BUFFER: [u32, ..8*16] = [0x00FFFFFF, ..8*16];
 pub static mut SAVE_X: u32 = 0;
 pub static mut SAVE_Y: u32 = 0;
 pub static START_ADDR: u32 = 1024*1024;
@@ -70,9 +70,9 @@ pub unsafe fn init(width: u32, height: u32)
         ws(0x10120018, 0x82B);
 
     }
-    set_bg(0x222C38);
-    set_fg(0xFAFCFF);
-    set_cursor_color(0xFAFCFF);
+    set_bg(0x000000);
+    set_fg(0x79DF51);
+    set_cursor_color(0xFFFFFF);
     fill_bg();
     draw_cursor();
 
