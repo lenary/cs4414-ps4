@@ -78,6 +78,8 @@ pub unsafe fn init(width: u32, height: u32)
     sgash::init();
 
     draw_cursor();
+
+    sgash::init();
 }
 
 pub unsafe fn write_char(c: char, address: *mut u32) {

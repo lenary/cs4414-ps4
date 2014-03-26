@@ -67,6 +67,8 @@ pub unsafe fn parsekey(x: char) {
         13      =>  {
             putstr(&"\n");
             drawstr(&"\n");
+
+            prompt(true);
         }
         127     =>  {
             putchar('');
@@ -129,5 +131,11 @@ fn screen() {
 
 pub unsafe fn init() {
     screen();
+    prompt(false);
+}
+
+pub unsafe fn prompt(preline: bool) {
+    putstr(&"sgash> ");
+    drawstr(&"sgash> ");
 }
 
