@@ -27,6 +27,7 @@ impl cstr {
 
     pub unsafe fn news(size: uint) -> cstr {
         // Sometimes this doesn't allocate enough memory and gets stuck...
+        let (z, w) = heap.alloc(size);
         let (x, y) = heap.alloc(size);
         let this = cstr {
             p: x,
@@ -170,37 +171,64 @@ impl cstr {
         *(self.p as *mut char) = '\0';
     }
 
+    #[allow(dead_code)]
     pub unsafe fn eq(&self, other: &cstr) -> bool {
-        // lengths not equal -> false
-        if (self.len() != other.len()) {
-            return false;
-        }
-        // both lengths are zero -> true
-        if self.len() == 0 && other.len() == 0 {
-            return true;
-        }
-        let mut i = 0;
-        while i < self.len() {
-            if (self.get_char(i) as u8) != (other.get_char(i) as u8) {
-                return false;
+        if (self.len() != other.len()) { return false; }
+        else {
+            let mut x = 0;
+            let mut selfp: uint = self.p as uint;
+            let mut otherp: uint = other.p as uint;
+            while x < self.len() {
+                if (*(selfp as *char) != *(otherp as *char)) { return false; }
+                selfp += 1;
+                otherp += 1;
+                x += 1;
             }
-            i += 1;
+            true
         }
-        true
     }
 
     pub unsafe fn streq(&self, other: &str) -> bool {
-        let mut i = 0;
+        let mut selfp: uint = self.p as uint;
         for c in slice::iter(as_bytes(other)) {
-            let selfc = self.get_char(i) as u8;
-            if( *c != selfc) {
+            if( *c != *(selfp as *u8) ) {
                 return false;
             }
-            i += 1;
+            selfp += 1;
         };
-        return true;
+        *(selfp as *char) == '\0'
     }
 
+    pub unsafe fn getarg(&self, delim: char, mut k: uint) -> Option<cstr> {
+        let mut ind: uint = 0;
+        let mut found = k == 0;
+        let mut selfp: uint = self.p as uint;
+        let mut s = cstr::new();
+        loop {
+            if (self.len() == 0) {
+                return None;
+            }
+            if (*(selfp as *char) == '\0') {
+                // End of string
+                if (found) { return Some(s); }
+                else { return None; }
+            };
+            if (*(selfp as *u8) == delim as u8) {
+                if (found) { return Some(s); }
+                k -= 1;
+            };
+            if (found) {
+                s.add_u8(*(selfp as *u8));
+            };
+            found = k == 0;
+            selfp += 1;
+            ind += 1;
+            if (ind == self.size) {
+                return None;
+            }
+        }
+    }
+    #[allow(dead_code)]
     pub unsafe fn split(&self, delim: char) -> (cstr, cstr) {
         let mut i = 0;
         let mut beg = cstr::new();
