@@ -134,7 +134,7 @@ pub unsafe fn parse_buffer() {
         history.map(drawchar);
         history.map(putchar);
     }
-    else {
+    else if buffer.len() > 0 {
         let nhistory = history.join(buffer);
         history = nhistory;
         heap.free(history.p);
