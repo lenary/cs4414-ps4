@@ -96,8 +96,6 @@ pub unsafe fn parsekey(x: char) {
             buffer.send_at_c(drawchar);
             putstr(&"\n");
             drawstr(&"\n");
-            buffer.send_at(putkeycode);
-            putstr(&" | ");
             prompt();
             buffer.reset();
         }
@@ -168,8 +166,6 @@ pub unsafe fn init() {
 }
 
 pub unsafe fn prompt() {
-    putnum(buffer.len(), 0);
-    putnum(buffer.p as uint, 0);
     putstr(&"sgash> ");
     let prev_c = super::super::io::FG_COLOR;
     super::super::io::set_fg(PROMPT_COLOR);
