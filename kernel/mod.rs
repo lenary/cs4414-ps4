@@ -15,7 +15,7 @@ pub mod cstr;
 
 #[cfg(target_word_size = "32")]
 pub mod rt;
-static START_ADDRESS : *mut u8 = 0x200_000 as *mut u8;
+static START_ADDRESS : *mut u8 = 0x300_000 as *mut u8;
 static MEMORY_ORDER : uint = 17;
 
 pub static mut heap: memory::Alloc = memory::Alloc {

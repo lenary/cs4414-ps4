@@ -18,24 +18,22 @@ static mut buffer: cstr = cstr {
     size: 0,
 };
 
-pub fn print_num(x: uint) {
-    putc(' ' as u8);
-    putc((((x / 1000000) % 10) as u8) + ('0' as u8));
-    putc((((x / 100000) % 10) as u8) + ('0' as u8));
-    putc((((x / 10000) % 10) as u8) + ('0' as u8));
-    putc((((x / 1000) % 10) as u8) + ('0' as u8));
-    putc((((x / 100) % 10) as u8) + ('0' as u8));
-    putc((((x / 10) % 10) as u8) + ('0' as u8));
-    putc(((x % 10) as u8) + ('0' as u8));
-    putc(' ' as u8);
+/* Thanks to https://github.com/jvns/puddle/blob/master/src/stdio.rs */
+pub fn putnum(x: uint, max: uint) {
+    let mut i = max;
+    if i == 0 {
+        i = 1000000;
+    }
+    while(i > 0) {
+        // Get the offset from each decimal point up to a certain value
+        putchar(((((x / i) % 10) as u8) + ('0' as u8)) as char);
+        i /= 10;
+    }
+    putchar(' ');
 }
 
-pub fn print_keycode(x: u8) {
-    print_num(x as uint);
-}
-
-fn putc(c: u8) {
-    putchar(c as char);
+pub fn putkeycode(x: u8) {
+    putnum(x as uint, 100);
 }
 
 pub fn putchar(key: char) {
@@ -49,7 +47,7 @@ pub fn putchar(key: char) {
     }
 }
 
-fn putstr(msg: &str) {
+pub fn putstr(msg: &str) {
     for c in slice::iter(as_bytes(msg)) {
         putchar(*c as char);
     }
@@ -98,7 +96,7 @@ pub unsafe fn parsekey(x: char) {
             buffer.send_at_c(drawchar);
             putstr(&"\n");
             drawstr(&"\n");
-            buffer.send_at(print_keycode);
+            buffer.send_at(putkeycode);
             putstr(&" | ");
             prompt();
             buffer.reset();
@@ -170,8 +168,8 @@ pub unsafe fn init() {
 }
 
 pub unsafe fn prompt() {
-    print_num(buffer.len());
-    print_num(buffer.p as uint);
+    putnum(buffer.len(), 0);
+    putnum(buffer.p as uint, 0);
     putstr(&"sgash> ");
     let prev_c = super::super::io::FG_COLOR;
     super::super::io::set_fg(PROMPT_COLOR);

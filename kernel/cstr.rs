@@ -10,6 +10,8 @@ use kernel::memory::Allocator;
 
 pub static DEFAULT_STRLEN: uint = 256;
 
+pub static mut count:uint = 0;
+
 pub struct cstr {
     p: *mut u8,
     p_cstr_i: uint,
@@ -43,13 +45,13 @@ impl cstr {
         this
     }
 
-    pub fn send_at(&self, f: |u8|) {
+    pub fn send_at(&mut self, f: |u8|) {
         self.send_at_c(|c: char| {
             f(c as u8)
         });
     }
     
-    pub fn send_at_c(&self, f: |char|) {
+    pub fn send_at_c(&mut self, f: |char|) {
         let mut i = 0;
         while i < self.len() {
             f(self.get_char(i));
