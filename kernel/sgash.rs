@@ -54,6 +54,11 @@ pub fn putchar(key: char) {
     }
 }
 
+pub unsafe fn showstr(msg: &str) {
+    putstr(msg);
+    drawstr(msg);
+}
+
 pub fn putstr(msg: &str) {
     for c in slice::iter(as_bytes(msg)) {
         putchar(*c as char);
@@ -121,8 +126,10 @@ pub unsafe fn parsekey(x: char) {
 }
 
 pub unsafe fn parse_buffer() {
-    putstr(&"\n");
-    drawstr(&"\n");
+    showstr(&"\n");
+    buffer.map(putchar);
+    buffer.map(drawchar);
+    showstr(&"\n");
     if buffer.streq(&"history") {
         history.map(drawchar);
         history.map(putchar);
@@ -133,10 +140,12 @@ pub unsafe fn parse_buffer() {
         heap.free(history.p);
         history.add_char('\n');
     }
-    buffer.map(putchar);
-    buffer.map(drawchar);
-    putstr(&"\n");
-    drawstr(&"\n");
+    let (command, args) = buffer.split(' ');
+    if command.streq(&"echo") {
+        args.map(drawchar);
+        args.map(putchar);
+        showstr(&"\n");
+    }
 }
 
 pub unsafe fn screen() {

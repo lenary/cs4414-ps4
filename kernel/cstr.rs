@@ -230,24 +230,22 @@ impl cstr {
     }
     #[allow(dead_code)]
     pub unsafe fn split(&self, delim: char) -> (cstr, cstr) {
-        let mut selfp: uint = self.p as uint;
+        let mut i = 0;
         let mut beg = cstr::new();
         let mut end = cstr::new();
         let mut found = false;
-        loop {
-            if (*(selfp as *char) == '\0') {
-                return (beg, end);
-            }
-            else if (*(selfp as *u8) == delim as u8) {
+        while i < self.len() && self.get_char(i) != '\0' {
+            if (!found && self.get_char(i) as u8 == delim as u8) {
                 found = true;
             }
             else if (!found) {
-                beg.add_u8(*(selfp as *u8));
+                beg.add_char(self.get_char(i));
             }
-            else if (found) {
-                end.add_u8(*(selfp as *u8));
+            else {
+                end.add_char(self.get_char(i));
             };
-            selfp += 1;
+            i += 1;
         }
+        (beg, end)
     }
 }
