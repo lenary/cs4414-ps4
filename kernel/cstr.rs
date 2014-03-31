@@ -199,35 +199,6 @@ impl cstr {
         *(selfp as *char) == '\0'
     }
 
-    pub unsafe fn getarg(&self, delim: char, mut k: uint) -> Option<cstr> {
-        let mut ind: uint = 0;
-        let mut found = k == 0;
-        let mut selfp: uint = self.p as uint;
-        let mut s = cstr::new();
-        loop {
-            if (self.len() == 0) {
-                return None;
-            }
-            if (*(selfp as *char) == '\0') {
-                // End of string
-                if (found) { return Some(s); }
-                else { return None; }
-            };
-            if (*(selfp as *u8) == delim as u8) {
-                if (found) { return Some(s); }
-                k -= 1;
-            };
-            if (found) {
-                s.add_u8(*(selfp as *u8));
-            };
-            found = k == 0;
-            selfp += 1;
-            ind += 1;
-            if (ind == self.size) {
-                return None;
-            }
-        }
-    }
     #[allow(dead_code)]
     pub unsafe fn split(&self, delim: char) -> (cstr, cstr) {
         let mut i = 0;
