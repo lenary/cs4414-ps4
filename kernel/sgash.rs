@@ -89,23 +89,23 @@ pub unsafe fn parsekey(x: char) {
     // Key codes are printed backwards because life is hard
 
     match x {
-        13      =>  {
+        13 =>  {
             putstr(&"\n");
             drawstr(&"\n");
-            buffer.send_at_c(putchar);
-            buffer.send_at_c(drawchar);
+            buffer.map(putchar);
+            buffer.map(drawchar);
             putstr(&"\n");
             drawstr(&"\n");
             prompt();
             buffer.reset();
         }
-        127     =>  {
+        127 =>  {
             putchar('');
             putchar(' ');
             putchar('');
             backspace();
         }
-        _       =>  {
+        _ =>  {
             buffer.add_u8(x);
             if io::CURSOR_X < io::SCREEN_WIDTH-io::CURSOR_WIDTH {
                 putchar(x as char);

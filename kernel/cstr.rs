@@ -27,6 +27,7 @@ impl cstr {
 
     pub unsafe fn news(size: uint) -> cstr {
         // Sometimes this doesn't allocate enough memory and gets stuck...
+        let (z, w) = heap.alloc(size);
         let (x, y) = heap.alloc(size);
         let this = cstr {
             p: x,
@@ -45,13 +46,13 @@ impl cstr {
         this
     }
 
-    pub fn send_at(&mut self, f: |u8|) {
-        self.send_at_c(|c: char| {
+    pub fn map_u8(&mut self, f: |u8|) {
+        self.map(|c: char| {
             f(c as u8)
         });
     }
     
-    pub fn send_at_c(&mut self, f: |char|) {
+    pub fn map(&mut self, f: |char|) {
         let mut i = 0;
         while i < self.len() {
             f(self.get_char(i));
@@ -193,7 +194,9 @@ impl cstr {
     pub unsafe fn streq(&self, other: &str) -> bool {
         let mut selfp: uint = self.p as uint;
         for c in slice::iter(as_bytes(other)) {
-            if( *c != *(selfp as *u8) ) { return false; }
+            if( *c != *(selfp as *u8) ) {
+                return false;
+            }
             selfp += 1;
         };
         *(selfp as *char) == '\0'
