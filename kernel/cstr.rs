@@ -52,28 +52,22 @@ impl cstr {
         });
     }
     
-    pub fn map(&mut self, f: |char|) {
+    pub fn map(&self, f: |char|) {
         let mut i = 0;
-        while i < self.len() {
+        while i < self.len() && self.get_char(i) != '\0' {
             f(self.get_char(i));
             i += 1;
         }
     }
 
     pub unsafe fn join(&self, other: cstr) -> cstr {
-        let mut i = 0;
-        let len = self.len() + other.len();
+        let mut len = DEFAULT_STRLEN;
+        while len < self.len() + other.len() {
+            len += DEFAULT_STRLEN;
+        }
         let mut new = cstr::news(len);
-
-        while i < self.len() {
-            new.add_u8(self.get_char(i) as u8);
-            i += 1;
-        }
-        i = 0;
-        while i < other.len() {
-            new.add_u8(other.get_char(i) as u8);
-            i += 1;
-        }
+        self.map(|c| { new.add_char(c); } );
+        other.map(|c| { new.add_char(c); } );
         new
     }
 
@@ -102,6 +96,9 @@ impl cstr {
             let iswhite = (c == (' ') || c == ('\n'));
             if !iswhite {
                 endwhite = false;
+            }
+            else {
+                new.delete_char();
             }
             i -= 1;
         }

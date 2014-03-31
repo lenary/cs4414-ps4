@@ -19,6 +19,12 @@ static mut buffer: cstr = cstr {
     size: 0,
 };
 
+static mut history: cstr = cstr {
+    p: 0 as *mut u8,
+    p_cstr_i: 0,
+    size: 0,
+};
+
 /* Thanks to https://github.com/jvns/puddle/blob/master/src/stdio.rs */
 pub fn putnum(x: uint, max: uint) {
     let mut i = max;
@@ -62,12 +68,14 @@ pub unsafe fn drawstr(msg: &str) {
 
 unsafe fn drawchar(x: char) {
     io::restore();
-    if x == '\n' {
+    if ((x as u8) as uint) == 10 || x == '\n' {
         io::CURSOR_Y += io::CURSOR_HEIGHT;
         io::CURSOR_X = 0u32;
     } else {
-        io::draw_char(x);
-        io::CURSOR_X += io::CURSOR_WIDTH;
+        if (((x as u8) as uint) >= 32 && ((x as u8) as uint) <= 125) {
+            io::draw_char(x);
+            io::CURSOR_X += io::CURSOR_WIDTH;
+        }
     }
     io::backup();
     io::draw_cursor();
@@ -91,12 +99,7 @@ pub unsafe fn parsekey(x: char) {
 
     match x {
         13 =>  {
-            putstr(&"\n");
-            drawstr(&"\n");
-            buffer.map(putchar);
-            buffer.map(drawchar);
-            putstr(&"\n");
-            drawstr(&"\n");
+            parse_buffer();
             prompt();
             buffer.reset();
         }
@@ -104,6 +107,7 @@ pub unsafe fn parsekey(x: char) {
             putchar('');
             putchar(' ');
             putchar('');
+            buffer.delete_char();
             backspace();
         }
         _ =>  {
@@ -114,6 +118,25 @@ pub unsafe fn parsekey(x: char) {
             }
         }
     }
+}
+
+pub unsafe fn parse_buffer() {
+    putstr(&"\n");
+    drawstr(&"\n");
+    if buffer.streq(&"history") {
+        history.map(drawchar);
+        history.map(putchar);
+    }
+    else {
+        let nhistory = history.join(buffer);
+        history = nhistory;
+        heap.free(history.p);
+        history.add_char('\n');
+    }
+    buffer.map(putchar);
+    buffer.map(drawchar);
+    putstr(&"\n");
+    drawstr(&"\n");
 }
 
 pub unsafe fn screen() {
@@ -162,6 +185,7 @@ pub unsafe fn screen() {
 
 pub unsafe fn init() {
     buffer = cstr::new();
+    history = cstr::news(512);
     screen();
     prompt();
 }
