@@ -5,10 +5,43 @@ use core::str::*;
 use core::option::{Some, Option, None};
 use core::iter::Iterator;
 use kernel::*;
+use kernel::cstr::cstr;
 use super::super::platform::*;
 use kernel::memory::Allocator;
 
+static PROMPT: &'static str = &"sgash> ";
 static PROMPT_COLOR: u32 = 0xFFAF00;
+static mut count: uint = 0;
+
+static mut buffer: cstr = cstr {
+    p: 0 as *mut u8,
+    p_cstr_i: 0,
+    size: 0,
+};
+
+static mut history: cstr = cstr {
+    p: 0 as *mut u8,
+    p_cstr_i: 0,
+    size: 0,
+};
+
+/* Thanks to https://github.com/jvns/puddle/blob/master/src/stdio.rs */
+pub fn putnum(x: uint, max: uint) {
+    let mut i = max;
+    if i == 0 {
+        i = 1000000;
+    }
+    while(i > 0) {
+        // Get the offset from each decimal point up to a certain value
+        putchar(((((x / i) % 10) as u8) + ('0' as u8)) as char);
+        i /= 10;
+    }
+    putchar(' ');
+}
+
+pub fn putkeycode(x: u8) {
+    putnum(x as uint, 100);
+}
 
 pub fn putchar(key: char) {
     unsafe {
@@ -21,7 +54,12 @@ pub fn putchar(key: char) {
     }
 }
 
-fn putstr(msg: &str) {
+pub unsafe fn showstr(msg: &str) {
+    putstr(msg);
+    drawstr(msg);
+}
+
+pub fn putstr(msg: &str) {
     for c in slice::iter(as_bytes(msg)) {
         putchar(*c as char);
     }
@@ -35,12 +73,14 @@ pub unsafe fn drawstr(msg: &str) {
 
 unsafe fn drawchar(x: char) {
     io::restore();
-    if x == '\n' {
+    if ((x as u8) as uint) == 10 || x == '\n' {
         io::CURSOR_Y += io::CURSOR_HEIGHT;
         io::CURSOR_X = 0u32;
     } else {
-        io::draw_char(x);
-        io::CURSOR_X += io::CURSOR_WIDTH;
+        if (((x as u8) as uint) >= 32 && ((x as u8) as uint) <= 125) {
+            io::draw_char(x);
+            io::CURSOR_X += io::CURSOR_WIDTH;
+        }
     }
     io::backup();
     io::draw_cursor();
@@ -63,19 +103,20 @@ pub unsafe fn parsekey(x: char) {
     // Key codes are printed backwards because life is hard
 
     match x {
-        13      =>  {
-            putstr(&"\n");
-            drawstr(&"\n");
-
+        13 =>  {
+            parse_buffer();
             prompt();
+            buffer.reset();
         }
-        127     =>  {
+        127 =>  {
             putchar('');
             putchar(' ');
             putchar('');
+            buffer.delete_char();
             backspace();
         }
-        _       =>  {
+        _ =>  {
+            buffer.add_u8(x);
             if io::CURSOR_X < io::SCREEN_WIDTH-io::CURSOR_WIDTH {
                 putchar(x as char);
                 drawchar(x as char);
@@ -84,7 +125,30 @@ pub unsafe fn parsekey(x: char) {
     }
 }
 
-fn screen() {
+pub unsafe fn parse_buffer() {
+    showstr(&"\n");
+    buffer.map(putchar);
+    buffer.map(drawchar);
+    showstr(&"\n");
+    if buffer.streq(&"history") {
+        history.map(drawchar);
+        history.map(putchar);
+    }
+    else {
+        let nhistory = history.join(buffer);
+        history = nhistory;
+        heap.free(history.p);
+        history.add_char('\n');
+    }
+    let (command, args) = buffer.split(' ');
+    if command.streq(&"echo") {
+        args.map(drawchar);
+        args.map(putchar);
+        showstr(&"\n");
+    }
+}
+
+pub unsafe fn screen() {
     putstr(&"\n                                                               ");
     putstr(&"\n                                                               ");
     putstr(&"\n                       7=..~$=..:7                             ");
@@ -129,16 +193,17 @@ fn screen() {
 }
 
 pub unsafe fn init() {
+    buffer = cstr::new();
+    history = cstr::news(512);
     screen();
     prompt();
 }
 
 pub unsafe fn prompt() {
-    putstr(&"sgash> ");
-    
+    putstr(PROMPT);
     let prev_c = super::super::io::FG_COLOR;
     super::super::io::set_fg(PROMPT_COLOR);
-    drawstr(&"sgash> ");
+    drawstr(PROMPT);
     super::super::io::set_fg(prev_c);
 }
 
