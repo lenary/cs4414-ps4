@@ -9,6 +9,7 @@ use kernel::cstr::cstr;
 use super::super::platform::*;
 use kernel::memory::Allocator;
 
+static PROMPT: &'static str = &"sgash> ";
 static PROMPT_COLOR: u32 = 0xFFAF00;
 static mut count: uint = 0;
 
@@ -166,10 +167,10 @@ pub unsafe fn init() {
 }
 
 pub unsafe fn prompt() {
-    putstr(&"sgash> ");
+    putstr(PROMPT);
     let prev_c = super::super::io::FG_COLOR;
     super::super::io::set_fg(PROMPT_COLOR);
-    drawstr(&"sgash> ");
+    drawstr(PROMPT);
     super::super::io::set_fg(prev_c);
 }
 
