@@ -3,6 +3,7 @@ use core::ptr::{set_memory, copy_memory, offset};
 use core::i32::ctlz32;
 use core::fail::out_of_memory;
 
+use kernel::sgash;
 use kernel::ptr::mut_offset;
 
 #[repr(u8)]
@@ -194,10 +195,10 @@ impl Allocator for Alloc {
     fn alloc(&mut self, size: uint) -> (*mut u8, uint) {
         let (offset, size) = self.parent.alloc(size);
         unsafe {
-            return (
-                mut_offset(self.base, (offset << self.el_size) as int),
-                size << self.el_size
-            )
+            let roffset = mut_offset(self.base, (offset << self.el_size) as int);
+            let rsize = size << self.el_size;
+            sgash::print_num(roffset as uint);
+            return (roffset, rsize)
         }
     }
 

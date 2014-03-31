@@ -5,10 +5,38 @@ use core::str::*;
 use core::option::{Some, Option, None};
 use core::iter::Iterator;
 use kernel::*;
+use kernel::cstr::cstr;
 use super::super::platform::*;
 use kernel::memory::Allocator;
 
 static PROMPT_COLOR: u32 = 0xFFAF00;
+static mut count: uint = 0;
+
+static mut buffer: cstr = cstr {
+    p: 0 as *mut u8,
+    p_cstr_i: 0,
+    size: 0,
+};
+
+pub fn print_num(x: uint) {
+    putc(' ' as u8);
+    putc((((x / 1000000) % 10) as u8) + ('0' as u8));
+    putc((((x / 100000) % 10) as u8) + ('0' as u8));
+    putc((((x / 10000) % 10) as u8) + ('0' as u8));
+    putc((((x / 1000) % 10) as u8) + ('0' as u8));
+    putc((((x / 100) % 10) as u8) + ('0' as u8));
+    putc((((x / 10) % 10) as u8) + ('0' as u8));
+    putc(((x % 10) as u8) + ('0' as u8));
+    putc(' ' as u8);
+}
+
+pub fn print_keycode(x: u8) {
+    print_num(x as uint);
+}
+
+fn putc(c: u8) {
+    putchar(c as char);
+}
 
 pub fn putchar(key: char) {
     unsafe {
@@ -66,8 +94,14 @@ pub unsafe fn parsekey(x: char) {
         13      =>  {
             putstr(&"\n");
             drawstr(&"\n");
-
+            buffer.send_at_c(putchar);
+            buffer.send_at_c(drawchar);
+            putstr(&"\n");
+            drawstr(&"\n");
+            buffer.send_at(print_keycode);
+            putstr(&" | ");
             prompt();
+            buffer.reset();
         }
         127     =>  {
             putchar('');
@@ -76,6 +110,7 @@ pub unsafe fn parsekey(x: char) {
             backspace();
         }
         _       =>  {
+            buffer.add_u8(x);
             if io::CURSOR_X < io::SCREEN_WIDTH-io::CURSOR_WIDTH {
                 putchar(x as char);
                 drawchar(x as char);
@@ -84,7 +119,7 @@ pub unsafe fn parsekey(x: char) {
     }
 }
 
-fn screen() {
+pub unsafe fn screen() {
     putstr(&"\n                                                               ");
     putstr(&"\n                                                               ");
     putstr(&"\n                       7=..~$=..:7                             ");
@@ -129,13 +164,15 @@ fn screen() {
 }
 
 pub unsafe fn init() {
+    buffer = cstr::new();
     screen();
     prompt();
 }
 
 pub unsafe fn prompt() {
+    print_num(buffer.len());
+    print_num(buffer.p as uint);
     putstr(&"sgash> ");
-    
     let prev_c = super::super::io::FG_COLOR;
     super::super::io::set_fg(PROMPT_COLOR);
     drawstr(&"sgash> ");
