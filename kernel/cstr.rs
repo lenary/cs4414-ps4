@@ -9,8 +9,7 @@ use super::super::platform::*;
 use kernel::memory::Allocator;
 
 pub static DEFAULT_STRLEN: uint = 256;
-
-pub static mut count:uint = 0;
+pub static mut first: bool = true;
 
 pub struct cstr {
     p: *mut u8,
@@ -27,7 +26,8 @@ impl cstr {
 
     pub unsafe fn news(size: uint) -> cstr {
         // Sometimes this doesn't allocate enough memory and gets stuck...
-        let (z, w) = heap.alloc(size);
+        if first { let (x, y) = heap.alloc(size); }
+        first = false;
         let (x, y) = heap.alloc(size);
         let this = cstr {
             p: x,
@@ -125,11 +125,15 @@ impl cstr {
         self.p_cstr_i
     }
 
-    // HELP THIS DOESN'T WORK THERE IS NO GARBAGE COLLECTION!!!
-    // -- TODO: exchange_malloc, exchange_free
-    #[allow(dead_code)]
     pub unsafe fn destroy(&self) {
         heap.free(self.p);
+    }
+    
+    pub fn get_p(&self, idx: uint) -> Option<uint> {
+        if idx > self.len() || idx > self.size || self.p_cstr_i > self.size {
+            return None;
+        }
+        Some((self.p as uint) + idx)
     }
     
     pub fn get_char(&self, idx: uint) -> char {
@@ -146,7 +150,7 @@ impl cstr {
     }
 
     pub fn add_u8(&mut self, x: u8) -> bool {
-        if (self.p_cstr_i >= self.size || self.size > DEFAULT_STRLEN) {
+        if (self.p_cstr_i + 1 >= self.size) {
             return false;
         }
         unsafe {
@@ -189,32 +193,36 @@ impl cstr {
     }
 
     pub unsafe fn streq(&self, other: &str) -> bool {
-        let mut selfp: uint = self.p as uint;
+        let mut i = 0;
         for c in slice::iter(as_bytes(other)) {
-            if( *c != *(selfp as *u8) ) {
+            if i > self.len() || *c != (self.get_char(i) as u8) {
                 return false;
             }
-            selfp += 1;
+            i += 1;
         };
-        *(selfp as *char) == '\0'
+        true
     }
 
     #[allow(dead_code)]
     pub unsafe fn split(&self, delim: char) -> (cstr, cstr) {
         let mut i = 0;
-        let mut beg = cstr::new();
-        let mut end = cstr::new();
+        let mut beg = cstr::news(self.size);
+        let mut end = cstr::news(self.size);
+        self.map(|c| {beg.add_char(c);});
         let mut found = false;
-        while i < self.len() && self.get_char(i) != '\0' {
-            if (!found && self.get_char(i) as u8 == delim as u8) {
+        while i < self.len() && !found {
+            if (!found && beg.get_char(i) as u8 == delim as u8) {
                 found = true;
+                match beg.get_p(i) {
+                    Some(p) => *(p as *mut char) = '\0',
+                    None => {},
+                }
+                beg.p_cstr_i = i;
             }
-            else if (!found) {
-                beg.add_char(self.get_char(i));
-            }
-            else {
-                end.add_char(self.get_char(i));
-            };
+            i += 1;
+        }
+        while i < self.len() {
+            end.add_char(self.get_char(i));
             i += 1;
         }
         (beg, end)
