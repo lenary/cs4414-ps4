@@ -26,7 +26,7 @@ impl cstr {
 
     pub unsafe fn news(size: uint) -> cstr {
         // Sometimes this doesn't allocate enough memory and gets stuck...
-        if first { let (x, y) = heap.alloc(size); }
+        if first { let (_, _) = heap.alloc(size); }
         first = false;
         let (x, y) = heap.alloc(size);
         let this = cstr {
@@ -120,7 +120,6 @@ impl cstr {
         }
     }
     
-    #[allow(dead_code)]
     pub fn len(&self) -> uint {
         self.p_cstr_i
     }

@@ -197,10 +197,6 @@ impl Allocator for Alloc {
         unsafe {
             let roffset = mut_offset(self.base, (offset << self.el_size) as int);
             let rsize = size << self.el_size;
-            //sgash::putchar('o');
-            //sgash::putnum(roffset as uint, 0);
-            //sgash::putchar('s');
-            //sgash::putnum(rsize as uint, 0);
             return (roffset, rsize)
         }
     }
