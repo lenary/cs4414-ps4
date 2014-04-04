@@ -10,6 +10,7 @@ use super::super::platform::*;
 use kernel::memory::Allocator;
 
 static PROMPT: &'static str = &"sgash> ";
+static UNRECOGNIZED: &'static str = &"Err: Unrecognized command\n";
 static PROMPT_COLOR: u32 = 0xFFAF00;
 static mut count: uint = 0;
 
@@ -129,6 +130,16 @@ pub unsafe fn parse_buffer() {
         args.map(drawchar);
         args.map(putchar);
         showstr(&"\n");
+    }
+    else if command.streq(&"cat") { }
+    else if command.streq(&"cd") { }
+    else if command.streq(&"rm") { }
+    else if command.streq(&"ls") { }
+    else if command.streq(&"mkdir") { }
+    else if command.streq(&"pwd") { }
+    else if command.streq(&"wr") { }
+    else {
+        showstr(UNRECOGNIZED);
     }
     command.destroy();
     args.destroy();

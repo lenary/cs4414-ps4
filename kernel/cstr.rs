@@ -174,7 +174,6 @@ impl cstr {
         *(self.p as *mut char) = '\0';
     }
 
-    #[allow(dead_code)]
     pub unsafe fn eq(&self, other: &cstr) -> bool {
         if (self.len() != other.len()) { return false; }
         else {
