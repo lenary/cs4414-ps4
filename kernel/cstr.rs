@@ -198,7 +198,7 @@ impl cstr {
             }
             i += 1;
         };
-        true
+        i == self.len()
     }
 
     #[allow(dead_code)]
