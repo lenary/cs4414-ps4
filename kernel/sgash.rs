@@ -20,6 +20,9 @@ static mut buffer: cstr = cstr {
     size: 0,
 };
 
+static mut a1: Option<cstr> = None;
+static mut a2: Option<cstr> = None;
+
 /* Thanks to https://github.com/jvns/puddle/blob/master/src/stdio.rs */
 pub fn putnum(x: uint, max: uint) {
     let mut i = max;
@@ -131,13 +134,56 @@ pub unsafe fn parse_buffer() {
         args.map(putchar);
         showstr(&"\n");
     }
-    else if command.streq(&"cat") { }
+    else if command.streq(&"cat") {
+        match a1 {
+            Some(s) => {
+                putstr(&"a1:");
+                s.map(drawchar);
+                s.map(putchar);
+                showstr(&"\n");
+            },
+            None => {}
+        }
+        match a2 {
+            Some(s) => {
+                putstr(&"a2:");
+                s.map(drawchar);
+                s.map(putchar);
+                showstr(&"\n");
+            },
+            None => {}
+        }
+    }
     else if command.streq(&"cd") { }
-    else if command.streq(&"rm") { }
-    else if command.streq(&"ls") { }
-    else if command.streq(&"mkdir") { }
+    else if command.streq(&"rm") { 
+        match a1 {
+            Some(s) => {
+                s.destroy();
+            },
+            None => {}
+        }
+        match a2 {
+            Some(s) => {
+                s.destroy();
+            },
+            None => {}
+        }
+        a1 = None;
+        a2 = None;
+    }
+    else if command.streq(&"ls") { 
+    }
+    else if command.streq(&"mkdir") { 
+        a1 = Some(cstr::news(1024));
+        a1.get().destroy();
+        a1 = Some(cstr::from_str(&"This is a string representing a1"));
+    }
     else if command.streq(&"pwd") { }
-    else if command.streq(&"wr") { }
+    else if command.streq(&"wr") { 
+        a2 = Some(cstr::news(512));
+        a2.get().destroy();
+        a2 = Some(cstr::from_str(&"This is a string representing a2"));
+    }
     else {
         showstr(UNRECOGNIZED);
     }

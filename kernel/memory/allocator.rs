@@ -122,13 +122,20 @@ impl BuddyAlloc {
                 (UNUSED, true) => {
                     // Found appropriate unused node
                     self.tree.set(index, USED); // use
-
+                    sgash::putstr(&"Allocated");
+                    sgash::putnum(size, 1024);
+                    sgash::putstr(&" bytes at");
+                    sgash::putnum(index, 1024);
+                    sgash::putstr(&"\n");
                     let mut parent = index;
                     loop {
                         let buddy = parent - 1 + (parent & 1) * 2;
                         match self.tree.get(buddy) {
                             USED | FULL if parent > 0 => {
                                 parent = (parent + 1) / 2 - 1;
+                                sgash::putstr(&"Changed parent");
+                                sgash::putnum(parent, 1024);
+                                sgash::putstr(&" to FULL.\n");
                                 self.tree.set(parent, FULL);
                             }
                             _ => break
@@ -179,7 +186,6 @@ impl BuddyAlloc {
         let mut length = 1 << self.order;
         let mut left = 0;
         let mut index = 0;
-        let mut order = self.order; // current height
         loop {
             match self.tree.get(index) {
                 UNUSED => { 
@@ -188,7 +194,9 @@ impl BuddyAlloc {
                 USED => { 
                     // Free *this* block.
                     self.tree.set(index, UNUSED);
-
+                    sgash::putstr(&"Freed node:");
+                    sgash::putnum(index, 1024);
+                    sgash::putstr(&"\n");
                     // Check for buddy block to free.
                     let mut parent = index;
                     loop {
@@ -199,7 +207,32 @@ impl BuddyAlloc {
                                 // parent's buddy. Repeat until we don't have
                                 // an empty split block above us.
                                 parent = (parent + 1) / 2 - 1;
-                                self.tree.set(parent, UNUSED);
+                                match self.tree.get(parent) {
+                                    FULL if parent > 0 => {
+                                        sgash::putstr(&"Freed parent:");
+                                        sgash::putnum(parent, 1024);
+                                        sgash::putstr(&"because buddy:");
+                                        sgash::putnum(buddy, 1024);
+                                        sgash::putstr(&"was UNUSED.\n");
+                                        sgash::putstr(&"\n");
+                                        self.tree.set(parent, UNUSED);
+                                    }
+                                    _ => {
+                                        sgash::putstr(&"Parent not full@");
+                                        sgash::putnum(parent, 1024);
+                                        sgash::putstr(&"\n");
+                                        break;
+                                    }
+                                }
+                            }
+                            SPLIT | USED if parent > 0 => {
+                                parent = (parent + 1) / 2 - 1;
+                                sgash::putstr(&"Split parent:");
+                                sgash::putnum(parent, 1024);
+                                sgash::putstr(&"because buddy:");
+                                sgash::putnum(buddy, 1024);
+                                sgash::putstr(&"was USED.\n");
+                                self.tree.set(parent, SPLIT);
                             }
                             _ => break
                         }
