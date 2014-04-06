@@ -3,6 +3,7 @@
 use super::cpu::{interrupt, uart, kmi};
 use core::option::{Option, None};
 use kernel;
+use kernel::sgash;
 
 pub fn init() {
     unsafe {
@@ -22,17 +23,20 @@ pub static mut kmi0_rec:  Option<extern unsafe fn(char)> = None;
 // this fires on all Interrupts; so we need to check which interrupt triggered it,
 #[no_mangle]
 pub unsafe fn handle_irq() {
+    asm!("");
+    let status: u32 = *interrupt::PIC_INT_STATUS;
 
-    // break here hopefully
+    sgash::putstr(&"I");
+    if ((status & uart::UART0_INT) > 0) {
+/*        *interrupt::PIC_INT_ENCLEAR = uart::UART0_INT;*/
 
-    if ((*interrupt::PIC_INT_STATUS & uart::UART0_INT) > 0) {
         // UART0 interrupt!
         uart0_rec.map(|f| {
-    		let x = *uart::UART0_DR as u8 as char;
-
-            *interrupt::PIC_INT_ENCLEAR = uart::UART0_INT;
-    		f(x)
+            let x = *uart::UART0_DR as u8 as char;
+            f(x)
         });
+
+/*        *interrupt::PIC_INT_ENABLE |= uart::UART0_INT;*/
     }
 
 /*    if ((*interrupt::PIC_INT_STATUS & interrupt::SIC_INT) > 0) {
@@ -40,7 +44,6 @@ pub unsafe fn handle_irq() {
         kmi0_rec.map(|f| {
             let x = *kmi::KMI0_DATA as u8 as char;
 
-            *interrupt::PIC_INT_ENCLEAR = interrupt::SIC_INT;
             f(x);
         });
     }*/
