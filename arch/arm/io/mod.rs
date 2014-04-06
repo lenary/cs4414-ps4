@@ -5,13 +5,6 @@ use kernel::sgash;
 
 mod font;
 
-/* http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/BBABEGGE.html */
-pub static UART0: *mut u32 = 0x101f1000 as *mut u32;
-
-pub static UART0_IMSC: *mut u32 = (0x101f1000 + 0x038) as *mut u32;
-#[allow(dead_code)]
-pub static VIC_INTENABLE: *mut u32 = (0x10140000 + 0x010) as *mut u32;
-
 // These store the current position of the cursor
 pub static mut CURSOR_X: u32 = 0;
 pub static mut CURSOR_Y: u32 = 0;

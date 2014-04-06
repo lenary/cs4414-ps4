@@ -1,10 +1,14 @@
 use core::mem::{volatile_store, transmute};
 use core::ptr::offset;
 
-use platform::io;
+use super::uart;
 
-static VIC_INT_ENABLE: *mut u32 = (0x10140000 + 0x010) as *mut u32;
-static UART0_IRQ: u8 = 12;
+
+static PIC_INT_ENABLE: *mut u32 = (0x10140000 + 0x010) as *mut u32;
+
+
+// static SIC_IRQ: u8 = /* VICINTSOURCE31 */
+
 static VT: *u32 = 0 as *u32;
 
 #[repr(u8)]
@@ -74,13 +78,13 @@ impl Table {
             ::: "r0", "r1", "r2", "cpsr");
 
             // enable UART0 IRQ [4]
-            *VIC_INT_ENABLE = 1 << UART0_IRQ;
+            *PIC_INT_ENABLE = uart::UART0_INT;
             // enable RXIM interrupt
             /*
              * See
              * http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0183f/I54603.html
              */
-            *io::UART0_IMSC = 1 << 4;
+            *uart::UART0_IMSC = uart::UART0_RXIM;
         }
     }
 }

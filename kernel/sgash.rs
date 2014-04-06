@@ -7,6 +7,7 @@ use core::iter::Iterator;
 use kernel::*;
 use kernel::cstr::cstr;
 use super::super::platform::*;
+use super::super::platform::cpu::uart;
 use kernel::memory::Allocator;
 
 static PROMPT: &'static str = &"sgash> ";
@@ -45,7 +46,7 @@ pub fn putchar(key: char) {
         * from optimizing this part out
         */
         asm!("");
-        io::write_char(key, io::UART0);
+        io::write_char(key, uart::UART0_DR);
     }
 }
 
