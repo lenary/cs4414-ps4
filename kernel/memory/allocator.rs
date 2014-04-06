@@ -122,7 +122,6 @@ impl BuddyAlloc {
                 (UNUSED, true) => {
                     // Found appropriate unused node
                     self.tree.set(index, USED); // use
-
                     let mut parent = index;
                     loop {
                         let buddy = parent - 1 + (parent & 1) * 2;
@@ -179,7 +178,6 @@ impl BuddyAlloc {
         let mut length = 1 << self.order;
         let mut left = 0;
         let mut index = 0;
-        let mut order = self.order; // current height
         loop {
             match self.tree.get(index) {
                 UNUSED => { 
@@ -188,7 +186,6 @@ impl BuddyAlloc {
                 USED => { 
                     // Free *this* block.
                     self.tree.set(index, UNUSED);
-
                     // Check for buddy block to free.
                     let mut parent = index;
                     loop {
@@ -199,7 +196,18 @@ impl BuddyAlloc {
                                 // parent's buddy. Repeat until we don't have
                                 // an empty split block above us.
                                 parent = (parent + 1) / 2 - 1;
-                                self.tree.set(parent, UNUSED);
+                                match self.tree.get(parent) {
+                                    FULL if parent > 0 => {
+                                        self.tree.set(parent, UNUSED);
+                                    }
+                                    _ => {
+                                        break;
+                                    }
+                                }
+                            }
+                            SPLIT | USED if parent > 0 => {
+                                parent = (parent + 1) / 2 - 1;
+                                self.tree.set(parent, SPLIT);
                             }
                             _ => break
                         }
