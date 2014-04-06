@@ -41,7 +41,7 @@ pub fn main() {
     table.load();
     drivers::init();
     unsafe {
-        drivers::keydown = Some(sgash::parsekey);
+        drivers::uart0_rec = Some(sgash::parsekey);
         io::init(640, 480);
     }
 }
