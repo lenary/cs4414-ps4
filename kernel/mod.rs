@@ -13,6 +13,7 @@ pub mod memory;
 pub mod sgash;
 pub mod cstr;
 pub mod kbd;
+pub mod commands;
 
 #[cfg(target_word_size = "32")]
 pub mod rt;

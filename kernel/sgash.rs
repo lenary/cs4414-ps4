@@ -11,6 +11,8 @@ use super::super::platform::*;
 use super::super::platform::cpu::uart;
 use kernel::memory::Allocator;
 
+use commands;
+
 static PROMPT: &'static str = &"sgash> ";
 static UNRECOGNIZED: &'static str = &"Err: Unrecognized command\n";
 static PROMPT_COLOR: u32 = 0xFFAF00;
@@ -135,13 +137,32 @@ pub unsafe fn parse_buffer() {
         args.map(putchar);
         showstr(&"\n");
     }
-    else if command.streq(&"cat") { }
-    else if command.streq(&"cd") { }
-    else if command.streq(&"rm") { }
-    else if command.streq(&"ls") { }
-    else if command.streq(&"mkdir") { }
-    else if command.streq(&"pwd") { }
-    else if command.streq(&"wr") { }
+    else if command.streq(&"cat") {
+        commands::cat(args);
+    }
+    else if command.streq(&"cd") { 
+        commands::cd(args);
+    }
+    else if command.streq(&"rm") { 
+        commands::rm(args);
+    }
+    else if command.streq(&"ls") { 
+        commands::ls(args);
+    }
+    else if command.streq(&"mkdir") {
+        commands::mkdir(args);
+    }
+    else if command.streq(&"pwd") { 
+        commands::pwd();
+    }
+    else if command.streq(&"wr") {
+        let (filename, string) = args.split(' ');
+        commands::wr(filename, string);
+    }
+    else if command.streq(&"mv") {
+        let (from, to_) = args.split(' ');
+        commands::mv(from, to_);
+    }
     else {
         showstr(UNRECOGNIZED);
     }
