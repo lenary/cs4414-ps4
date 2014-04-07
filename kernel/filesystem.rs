@@ -134,19 +134,18 @@ impl Node {
 //             Node::new_dummy() 
 //             }
 //     }
-    
-//     fn insert(pointer: Node, data: cstr) -> Option<Node> {
-//         while (!pointer.next.is_none()) {
-//             pointer = pointer.next;
-//         }
+
+// fn insert(pointer: Node, data: cstr) -> Option<Node> {
+//     while (!pointer.next.is_none()) {
 //         pointer = pointer.next;
-//         pointer.data = data;
-//         pointer.next = NULL;
 //     }
+//     pointer = pointer.next;
+//     pointer.data = data;
+//     pointer.next = NULL;
+// }
 
 //     fn find_str (pointer: Node, key: cstr) -> bool {
 //         pointer = pointer.next; //dummy node is first
-
 //         while (!pointer.is_none()) {
 //             if (pointer.data == key) {
 //                 return true;
@@ -161,8 +160,7 @@ impl Node {
 //             pointer = pointer.next;
 //         }
 //         if (pointer.next.is_none()) {
-
-//             //HANDLE IF NOT IN LIST
+//             
 //         }
 
 //         let mut temp = Node {next: pointer.next};
@@ -183,7 +181,6 @@ impl Node {
 
 //     //writes the given string to the given file
 //     pub unsafe fn write_file(file: File, string: cstr) {
-        
 //         let mut file = file.name;
 //         file.value = string;
           
