@@ -3,6 +3,7 @@
 use core::*;
 use core::str::*;
 use core::option::{Some, Option, None};
+use core::mem::volatile_store;
 use core::iter::Iterator;
 use kernel::*;
 use kernel::cstr::cstr;
@@ -41,12 +42,7 @@ pub fn putkeycode(x: u8) {
 
 pub fn putchar(key: char) {
     unsafe {
-        /*
-        * We need to include a blank asm call to prevent rustc
-        * from optimizing this part out
-        */
-        asm!("");
-        io::write_char(key, uart::UART0_DR);
+        volatile_store(uart::UART0_DR, key);
     }
 }
 

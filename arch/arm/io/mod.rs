@@ -1,6 +1,5 @@
 /* io::mod.rs */
 
-use core::mem::volatile_store;
 use kernel::sgash;
 
 mod font;
@@ -73,10 +72,6 @@ pub unsafe fn init(width: u32, height: u32)
     draw_cursor();
 
     sgash::init();
-}
-
-pub unsafe fn write_char(c: char, address: *mut u32) {
-    volatile_store(address, c as u32);
 }
 
 pub unsafe fn scrollup()
