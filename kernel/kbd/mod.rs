@@ -43,7 +43,7 @@ pub unsafe fn parse_kmi_key(c: u8) -> Option<u8> {
         0x0B => Some(48),     // 0 (zero) pressed 
         0x0C => Some(45),     // - pressed 
         0x0D => None,         // #NAME?
-        0x0E => Some(8),      //, backspace pressed 
+        0x0E => Some(127),      //, backspace pressed 
         0x0F => Some(9),      // tab pressed 
         0x10 => Some(81),     // Q pressed 
         0x11 => Some(87),     // W pressed 
