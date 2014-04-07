@@ -43,6 +43,7 @@ pub fn main() {
     drivers::init();
     unsafe {
         drivers::uart0_rec = Some(sgash::parsekey);
+        drivers::kmi0_rec = Some(sgash::from_keyboard);
         io::init(640, 480);
     }
 }

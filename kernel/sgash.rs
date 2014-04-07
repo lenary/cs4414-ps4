@@ -117,6 +117,13 @@ pub unsafe fn parsekey(x: char) {
     }
 }
 
+pub unsafe fn from_keyboard(x: u8) {
+    match kbd::parse_kmi_key(x) {
+        Some(y) => parsekey(y as char),
+        None    => ()
+    }
+}
+
 pub unsafe fn parse_buffer() {
     showstr(&"\n");
     buffer.map(putchar);

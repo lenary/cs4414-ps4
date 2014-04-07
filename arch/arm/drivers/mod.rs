@@ -18,7 +18,7 @@ pub fn init() {
 pub static mut uart0_rec: Option<extern unsafe fn(char)> = None;
 
 // A pointer to a rust function for dealing with KMI0 Data (PS/2 Keyboard)
-pub static mut kmi0_rec:  Option<extern unsafe fn(char)> = None;
+pub static mut kmi0_rec:  Option<extern unsafe fn(u8)> = None;
 
 // this fires on all Interrupts; so we need to check which interrupt triggered it,
 #[no_mangle]
@@ -27,7 +27,7 @@ pub unsafe fn handle_irq() {
 
     if ((pic_status & uart::UART0_INT) != 0) {
         uart0_rec.map(|f| {
-            let x = volatile_load(uart::UART0_DR as *char);
+            let x = volatile_load(uart::UART0_DR);
             f(x)
         });
     }
@@ -36,7 +36,7 @@ pub unsafe fn handle_irq() {
 
         if ((sic_status & kmi::KMI0_INT) != 0) {
             kmi0_rec.map(|f| {
-                let x = volatile_load(kmi::KMI0_DR as *char);
+                let x = volatile_load(kmi::KMI0_DR);
                 f(x);
             });
         }
