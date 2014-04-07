@@ -1,7 +1,37 @@
 use core::option::{Option, Some, None};
 
-pub fn parse_kmi_key(c: u8) -> Option<u8> {
-    match c {
+static mut SHIFTED: bool = false;
+
+fn is_A_Z(c: u8) -> bool {
+    c >= 65 && c <= 90
+}
+
+pub unsafe fn parse_kmi_key(c: u8) -> Option<u8> {
+    let c_ascii: Option<u8> = match c {
+        /*
+        0x2A => { SHIFTED = true; None},
+        0x36 => { SHIFTED = true; None},
+        0xAA => { SHIFTED = false; None },
+        0xB6 => { SHIFTED = false; None },
+        0x02 if SHIFTED => Some('!' as u8), // 1 pressed 
+        0x03 if SHIFTED => Some('@' as u8), // 2 pressed 
+        0x04 if SHIFTED => Some('#' as u8), // 3 pressed 
+        0x05 if SHIFTED => Some('$' as u8), // 4 pressed 
+        0x06 if SHIFTED => Some('%' as u8), // 5 pressed 
+        0x07 if SHIFTED => Some('^' as u8), // 6 pressed 
+        0x08 if SHIFTED => Some('&' as u8), // 7 pressed 
+        0x09 if SHIFTED => Some('*' as u8), // 8 pressed 
+        0x0A if SHIFTED => Some('(' as u8), // 9 pressed 
+        0x0B if SHIFTED => Some(')' as u8), // 0 (zero) pressed 
+        0x0C if SHIFTED => Some('-' as u8), // - pressed 
+        0x27 if SHIFTED => Some(':' as u8),     //  ; pressed 
+        0x28 if SHIFTED => Some('"' as u8), // ' (single quote) pressed 
+        0x29 if SHIFTED => None, // TODO: We have no ~ character
+        0x2B if SHIFTED => Some('|' as u8),     // \ pressed 
+        0x33 if SHIFTED => Some('<' as u8), // , pressed 
+        0x34 if SHIFTED => Some('>' as u8),     // . pressed 
+        0x35 if SHIFTED => Some('?' as u8),     // / pressed 
+        */
         0x01 => Some(27),     // escape pressed 
         0x02 => Some(49),     // 1 pressed 
         0x03 => Some(50),     // 2 pressed 
@@ -30,7 +60,7 @@ pub fn parse_kmi_key(c: u8) -> Option<u8> {
         0x1A => Some(91),     // [ pressed 
         0x1B => Some(93),     // ] pressed 
         0x1C => Some(13),     // enter pressed 
-        0x1D => None,         // left control pressed 
+        0x1D => None,         // TODO: control pressed
         0x1E => Some(65),     // A pressed 
         0x1F => Some(83),     // S pressed 
         0x20 => Some(68),     // D pressed 
@@ -41,9 +71,8 @@ pub fn parse_kmi_key(c: u8) -> Option<u8> {
         0x25 => Some(75),     // K pressed 
         0x26 => Some(76),     // L pressed 
         0x27 => Some(59),     //  ; pressed 
-        0x28 => Some(39),     // ' (single quote) pressed 
+        0x28 => Some(39), // ' (single quote) pressed 
         0x29 => Some(96),     // ` (back tick) pressed 
-        0x2A => None,         // left shift pressed // TODO
         0x2B => Some(92),     // \ pressed 
         0x2C => Some(90),     // Z pressed 
         0x2D => Some(88),     // X pressed 
@@ -52,163 +81,26 @@ pub fn parse_kmi_key(c: u8) -> Option<u8> {
         0x30 => Some(66),     // B pressed 
         0x31 => Some(78),     // N pressed 
         0x32 => Some(77),     // M pressed 
-        0x33 => Some(44),     // , pressed 
+        0x33            => Some(44), // , pressed 
         0x34 => Some(46),     // . pressed 
-        0x35 => Some(47),     // / pressed 
-        0x36 => None,         // right shift pressed  // TODO
-        0x37 => None,         // (keypad) * pressed 
-        0x38 => None,         // left alt pressed 
         0x39 => Some(32),     // space pressed 
-        0x3A => None,         // CapsLock pressed 
-        0x3B => None,         // F1 pressed 
-        0x3C => None,         // F2 pressed 
-        0x3D => None,         // F3 pressed 
-        0x3E => None,         // F4 pressed 
-        0x3F => None,         // F5 pressed 
-        0x40 => None,         // F6 pressed 
-        0x41 => None,         // F7 pressed 
-        0x42 => None,         // F8 pressed 
-        0x43 => None,         // F9 pressed 
-        0x44 => None,         // F10 pressed 
-        0x45 => None,         // NumberLock pressed 
-        0x46 => None,         // ScrollLock pressed 
-        0x47 => None,         // (keypad) 7 pressed 
-        0x48 => None,         // (keypad) 8 pressed 
-        0x49 => None,         // (keypad) 9 pressed 
-        0x4A => None,         // (keypad) - pressed 
-        0x4B => None,         // (keypad) 4 pressed 
-        0x4C => None,         // (keypad) 5 pressed 
-        0x4D => None,         // (keypad) 6 pressed 
-        0x4E => None,         // (keypad) + pressed 
-        0x4F => None,         // (keypad) 1 pressed 
-        0x50 => None,         // (keypad) 2 pressed 
-        0x51 => None,         // (keypad) 3 pressed 
-        0x52 => None,         // (keypad) 0 pressed 
-        0x53 => None,         // (keypad) . pressed 
-        0x57 => None,         // F11 pressed 
-        0x58 => None,         // F12 pressed 
-        0x81 => None,         // escape released 
-        0x82 => None,         // 1 released 
-        0x83 => None,         // 2 released 
-        0x84 => None,         // 3 released 
-        0x85 => None,         // 4 released 
-        0x86 => None,         // 5 released 
-        0x87 => None,         // 6 released 
-        0x88 => None,         // 7 released 
-        0x89 => None,         // 8 released 
-        0x8A => None,         // 9 released 
-        0x8B => None,         // 0 (zero) released 
-        0x8C => None,         // - released 
-        0x8D => None,         // #NAME?
-        0x8E => None,         // backspace released 
-        0x8F => None,         // tab released 
-        0x90 => None,         // Q released 
-        0x91 => None,         // W released 
-        0x92 => None,         // E released 
-        0x93 => None,         // R released 
-        0x94 => None,         // T released 
-        0x95 => None,         // Y released 
-        0x96 => None,         // U released 
-        0x97 => None,         // I released 
-        0x98 => None,         // O released 
-        0x99 => None,         // P released 
-        0x9A => None,         // [ released 
-        0x9B => None,         // ] released 
-        0x9C => None,         // enter released 
-        0x9D => None,         // left control released 
-        0x9E => None,         // A released 
-        0x9F => None,         // S released 
-        0xA0 => None,         // D released 
-        0xA1 => None,         // F released 
-        0xA2 => None,         // G released 
-        0xA3 => None,         // H released 
-        0xA4 => None,         // J released 
-        0xA5 => None,         // K released 
-        0xA6 => None,         // L released 
-        0xA7 => None,         //  ; released 
-        0xA8 => None,         // ' (single quote) released 
-        0xA9 => None,         // ` (back tick) released 
-        0xAA => None,         // left shift released 
-        0xAB => None,         // \ released 
-        0xAC => None,         // Z released 
-        0xAD => None,         // X released 
-        0xAE => None,         // C released 
-        0xAF => None,         // V released 
-        0xB0 => None,         // B released 
-        0xB1 => None,         // N released 
-        0xB2 => None,         // M released 
-        0xB3 => None,         // , released 
-        0xB4 => None,         // . released 
-        0xB5 => None,         // / released 
-        0xB6 => None,         // right shift released 
-        0xB7 => None,         // (keypad) * released 
-        0xB8 => None,         // left alt released 
-        0xB9 => None,         // space released 
-        0xBA => None,         // CapsLock released 
-        0xBB => None,         // F1 released 
-        0xBC => None,         // F2 released 
-        0xBD => None,         // F3 released 
-        0xBE => None,         // F4 released 
-        0xBF => None,         // F5 released 
-        0xC0 => None,         // F6 released 
-        0xC1 => None,         // F7 released 
-        0xC2 => None,         // F8 released 
-        0xC3 => None,         // F9 released 
-        0xC4 => None,         // F10 released 
-        0xC5 => None,         // NumberLock released 
-        0xC6 => None,         // ScrollLock released 
-        0xC7 => None,         // (keypad) 7 released 
-        0xC8 => None,         // (keypad) 8 released 
-        0xC9 => None,         // (keypad) 9 released 
-        0xCA => None,         // (keypad) - released 
-        0xCB => None,         // (keypad) 4 released 
-        0xCC => None,         // (keypad) 5 released 
-        0xCD => None,         // (keypad) 6 released 
-        0xCE => None,         // (keypad) + released 
-        0xCF => None,         // (keypad) 1 released 
-        0xD0 => None,         // (keypad) 2 released 
-        0xD1 => None,         // (keypad) 3 released 
-        0xD2 => None,         // (keypad) 0 released 
-        0xD3 => None,         // (keypad) . released 
-        0xD7 => None,         // F11 released 
-        0xD8 => None,         // F12 released 
-        0xE0 | 0x1C => None,  // (keypad) enter pressed 
-        0xE0 | 0x1D => None,  // right control pressed 
-        0xE0 | 0x2A | 0xE0 | 0x37 => None, // print screen pressed 
-        0xE0 | 0x35 => None,  // (keypad) / pressed 
-        0xE0 | 0x38 => None,  // right alt (or altGr) pressed 
-        0xE0 | 0x47 => None,  // home pressed 
-        0xE0 | 0x48 => None,  // cursor up pressed 
-        0xE0 | 0x49 => None,  // page up pressed 
-        0xE0 | 0x4B => None,  // cursor left pressed 
-        0xE0 | 0x4D => None,  // cursor right pressed 
-        0xE0 | 0x4F => None,  // end pressed 
-        0xE0 | 0x50 => None,  // cursor down pressed 
-        0xE0 | 0x51 => None,  // page down pressed 
-        0xE0 | 0x52 => None,  // insert pressed 
-        0xE0 | 0x53 => None,  // delete pressed 
-        0xE0 | 0x5B => None,  // left GUI pressed 
-        0xE0 | 0x5C => None,  // right GUI pressed 
-        0xE0 | 0x5D => None,  // "apps" pressed 
-        0xE0 | 0x9C => None,  // (keypad) enter released 
-        0xE0 | 0x9D => None,  // right control released 
-        0xE0 | 0xB5 => None,  // (keypad) / released 
-        0xE0 | 0xB7 | 0xE0 | 0xAA => None, // print screen released 
-        0xE0 | 0xB8 => None,  // right alt (or altGr) released 
-        0xE0 | 0xC7 => None,  // home released 
-        0xE0 | 0xC8 => None,  // cursor up released 
-        0xE0 | 0xC9 => None,  // page up released 
-        0xE0 | 0xCB => None,  // cursor left released 
-        0xE0 | 0xCD => None,  // cursor right released 
-        0xE0 | 0xCF => None,  // end released 
-        0xE0 | 0xD0 => None,  // cursor down released 
-        0xE0 | 0xD1 => None,  // page down released 
-        0xE0 | 0xD2 => None,  // insert released 
-        0xE0 | 0xD3 => None,  // delete released 
-        0xE0 | 0xDB => None,  // left GUI released 
-        0xE0 | 0xDC => None,  // right GUI released 
-        0xE0 | 0xDD => None,  // "apps" released 
-        0xE1 | 0x1D => None,  // 0x45, 0xE1, 0x9D, 0xC5 	pause pressed 
         _ => None
+    };
+    
+    match SHIFTED {
+        false => { match c_ascii { // uppercase
+            Some(lc_c) => {
+                if is_A_Z(lc_c) {
+                    Some(lc_c + 32)
+                }
+                else {
+                    Some(lc_c)
+                }
+            }
+            None => {
+                None
+            }
+        }}
+        true => c_ascii,
     }
 }
