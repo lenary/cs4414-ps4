@@ -4,49 +4,90 @@
 // use core::*;
 // use core::str::*;
 // use core::option::{Some, Option, None};
-// use core::iter::Iterator;
+use core::iter::Iterator;
 // use kernel::*;
 // use kernel::cstr::cstr;
 // use super::super::platform::*;
 // use kernel::memory::Allocator;
 
-pub struct Node {
-    parent: Option<Node>,
-    child: Option<Node>,
-    next: Option<Node>,
-    prev: Option<Node>,
+// pub struct Node {
+//     parent: Option<Node>,
+//     child: Option<Node>,
+//     next: Option<Node>,
+//     prev: Option<Node>,
+//     data: cstr,
+//     name: cstr
+// }
+
+enum Node {
+    File,
+    Dir,
+    Dummy
+}
+
+pub struct File {
     data: cstr,
-    name: cstr
+    name: cstr,
+    next: Some<Node>,
+    prev: Some<Node>,
+    parent: None,
+    child: None
+}
+
+pub struct Dir {
+    data: cstr,
+    name: cstr,
+    next: Some<Node>,
+    prev: Some<Node>,
+    parent: None,
+    child: Some<Node>
+}
+
+pub struct Dummy {
+    data: cstr,
+    name: cstr,
+    next: Some<Node>,
+    prev: None,
+    parent: Some<Node>,
+    child: None
 }
 
 impl Node {  
 
-    fn is_file(&self: Node) {
-        data: 
-        name: 
-        next: Some<Node>,
-        prev: Some<Node>,
-        parent: None,
-        child: None
+    fn is_file(&self: Node) -> bool {
+        match (self) {
+            data: 
+            name: 
+            next: Some<Node>,
+            prev: Some<Node>,
+            parent: None,
+            child: None
+        }
     }
 
-    fn is_dir(&self: Node) {
-        data:
-        name: 
-        next: Some<Node>,
-        prev: Some<Node>,
-        parent: None,
-        child: Some<Node>
-
+    fn is_dir(&self: Node) -> bool {
+        match (self.parent) {
+            None =>
+            // data: cstr,
+            // name: cstr,
+            // next: Some<Node>,
+            // prev: Some<Node>,
+            // parent: None,
+            // child: Some<Node>
+    }
     }
 
-    fn is_dummy(&self: Node) {
-        data: EMPTY,
-        name: EMPTY,
-        next: Some<Node>,
-        prev: None,
-        parent: Some<Node>,
-        child: None
+    fn is_dummy(&self: Node) -> bool {
+        match (self.child) {
+            None => return true;
+            _ => return false;
+        //     data: EMPTY,
+        // name: EMPTY,
+        // next: Some<Node>,
+        // prev: None,
+        // parent: Some<Node>,
+        // child: None
+        }
     }
 
     fn new_dummy() -> Node {
@@ -71,7 +112,7 @@ impl Node {
         newFile;
     }
 
-    fn new_dir() -> Node {
+    fn new_dir(&self) -> Node {
             let mut newDir = Dir {
             dir_name: name,
             parent: None,
@@ -80,7 +121,6 @@ impl Node {
         newDir;
     }
 }
-
 
 impl Dir {
     
@@ -103,115 +143,133 @@ impl Dir {
 
 }
 
-// pub struct List<~Node> {
+pub struct List<Node> {
 
+}
 
+// enum List {
+//     Cons (...), //next item in list
+//     Nil //end of list
 // }
 
-// impl List<~Node> { 
-//     fn new() -> List<~Node> { 
-//         List { head: new_dummy() }
-//     }
 
-//     fn add(&mut self, item: T)
-//     {
-//         // let tail = self;
-//         // loop
-//         // {
-//         //     match *tail
-//         //     {
-//         //         Node(_, ~ref next) => tail = next,
-//         //         Nil => break
-//         //     }
-//         // }
-//         // *tail = Node(item, ~Nil);
-//     }
-
-//     pub unsafe fn is_file(&self) -> bool {
-//         match (self) {
-//             Some => {},
-//             None => {}
-//         }
-//     }
-
-//     pub unsafe fn is_dir(&self) -> bool {
-//         match (self) {
-//             Some => {},
-//             None => {}
-//         }
-//     }
-
-//     //writes the given string to the given file
-//     pub unsafe fn write_file(file: File, string: cstr) {
-//         match (file) {
-//             Some (ref file) => { file.value = string },
-//             None => { }
-//         }   
-//     }
-
-//     //returns the string stored in a given file
-//     pub unsafe fn read_file(&mut self) -> cstr {
-//         match(self) {
-//             // Some(ref mut current) => {
-//             //     current.value: },
-//             // None => { }
-
-//             // use putstr / drawstr            
-//         }
-//     }
-
-//     //creates a file with the given name in the given directory
-//     pub unsafe fn create_file(thisDir: Dir, thisName: cstr) {
-//         // File::new()
-//     }
-
-//     //deletes the file with the given name in the given directory
-//     pub unsafe fn delete_file(thisDir: Dir, thisName: cstr) {
-
-//     }
-
-//     //gets the file with the given name belonging to the specified directory
-//     pub unsafe fn get_file(thisDir: Dir, thisName: cstr) -> File {
-       
-
-//     }
-
-
-//     //returns the list of files and directories contained in the specified directory
-//     pub unsafe fn list_directory(directory) {
-//         //for loop through contents of directory (files, directories)
-//         for (file : directory) {
-//             putstr(file.value);
-//             drawstr(file.value);
-//         }
-
-//         for (dir : directory) {
-//             putstr(dir.dir_name);
-//             drawstr(dir.dir_name);
-//         }
-
-//     }
+impl List<Node> { 
+    fn new() -> List<Node> { 
+        let mut list = List { 
+            //create new list with a dummy node
+            Node::new_dummy() 
+            }
+    }
     
-//     // creates a directory with the specified name under the given parent directory
-//     pub unsafe fn create_directory(parent, name) {
+    fn insert(pointer: Node, data: cstr) {
+        while (pointer.next != None) {
+            pointer = pointer.next;
+        }
+        pointer = pointer.next;
+        pointer.data = data;
+        pointer.next = NULL;
+    }
 
-//     }
+    fn find_str (pointer: Node, key: cstr) -> bool {
+        pointer = pointer.next; //dummy node is first
 
-//     //deletes the given directory if and only if it is empty
-//     pub unsafe fn delete_directory(directory) {
+        while (pointer != None) {
+            if (pointer.data == key) {
+                return true;
+            }
+            pointer = pointer.next; //look in next node
+        }
+        return false;  
+    }
 
-//         if (dir.is_empty() == true) {
-//             //then remove
-//         }
+    fn delete(pointer: Node, data: cstr) {
+        while (pointer.next != None && (pointer.next).data != data) {
+            pointer = pointer.next;
+        }
+        if (pointer.next == None) {
 
-//     }
+            //HANDLE IF NOT IN LIST
+        }
 
-//     //gets the directory with the given name belonging to the specified parent
-//     pub unsafe fn get_directory(parent, name) {
+        let mut temp = Node {next: pointer.next};
+        pointer.next = temp.next;
+
+        //
+
+
+    }
+
+
+
+    //writes the given string to the given file
+    pub unsafe fn write_file(file: File, string: cstr) {
+        
+        let mut file = file.name;
+        file.value = string;
+          
+    }
+
+    //returns the string stored in a given file
+    pub unsafe fn read_file(&mut self) -> cstr {
+            putstr(self.data);
+            drawstr(self.data);
+    }
+
+    //creates a file with the given name in the given directory
+    pub unsafe fn create_file(thisDir: Dir, thisName: cstr) {
+        let mut newFile = File {
+            parent: thisDir,
+            name: thisName,
+            next: 
+        }
+    }
+
+    //deletes the file with the given name in the given directory
+    pub unsafe fn delete_file(thisDir: Dir, thisName: cstr) {
+
+    }
+
+    //gets the file with the given name belonging to the specified directory
+    pub unsafe fn get_file(thisDir: Dir, thisName: cstr) -> File {
+       if (thisDir.name = )
+
+    }
+
+
+    //returns the list of files and directories contained in the specified directory
+    pub unsafe fn list_directory(directory: Dir, ) {
+        //for loop through contents of directory (files, directories)
+        for (file : directory) {
+            putstr(file.name);
+            drawstr(file.name);
+        }
+
+        for (dir : directory) {
+            putstr(dir.dir_name);
+            drawstr(dir.dir_name);
+        }
+
+    }
+    
+    // creates a directory with the specified name under the given parent directory
+    pub unsafe fn create_directory(parent, name) {
+
+    }
+
+    //deletes the given directory if and only if it is empty
+    pub unsafe fn delete_directory(directory) {
+        for (dir in  )
+        if (dir.is_empty() == true) {
+            //then remove
+        }
+
+    }
+
+    //gets the directory with the given name belonging to the specified parent
+    pub unsafe fn get_directory(parent, name) {
 
         
-//     }
-
+    }
 
 }
 
