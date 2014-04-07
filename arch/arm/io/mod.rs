@@ -1,16 +1,8 @@
 /* io::mod.rs */
 
-use core::mem::volatile_store;
 use kernel::sgash;
 
 mod font;
-
-/* http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0225d/BBABEGGE.html */
-pub static UART0: *mut u32 = 0x101f1000 as *mut u32;
-
-pub static UART0_IMSC: *mut u32 = (0x101f1000 + 0x038) as *mut u32;
-#[allow(dead_code)]
-pub static VIC_INTENABLE: *mut u32 = (0x10140000 + 0x010) as *mut u32;
 
 // These store the current position of the cursor
 pub static mut CURSOR_X: u32 = 0;
@@ -80,10 +72,6 @@ pub unsafe fn init(width: u32, height: u32)
     draw_cursor();
 
     sgash::init();
-}
-
-pub unsafe fn write_char(c: char, address: *mut u32) {
-    volatile_store(address, c as u32);
 }
 
 pub unsafe fn scrollup()

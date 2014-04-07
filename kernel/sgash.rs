@@ -3,10 +3,12 @@
 use core::*;
 use core::str::*;
 use core::option::{Some, Option, None};
+use core::mem::volatile_store;
 use core::iter::Iterator;
 use kernel::*;
 use kernel::cstr::cstr;
 use super::super::platform::*;
+use super::super::platform::cpu::uart;
 use kernel::memory::Allocator;
 
 static PROMPT: &'static str = &"sgash> ";
@@ -40,12 +42,7 @@ pub fn putkeycode(x: u8) {
 
 pub fn putchar(key: char) {
     unsafe {
-        /*
-        * We need to include a blank asm call to prevent rustc
-        * from optimizing this part out
-        */
-        asm!("");
-        io::write_char(key, io::UART0);
+        volatile_store(uart::UART0_DR, key);
     }
 }
 
@@ -103,7 +100,7 @@ pub unsafe fn parsekey(x: char) {
             prompt();
             buffer.reset();
         }
-        127 =>  {
+        8 | 127 =>  {
             putchar('');
             putchar(' ');
             putchar('');
@@ -117,6 +114,13 @@ pub unsafe fn parsekey(x: char) {
                 buffer.add_u8(x);
             }
         }
+    }
+}
+
+pub unsafe fn from_keyboard(x: u8) {
+    match kbd::parse_kmi_key(x) {
+        Some(y) => parsekey(y as char),
+        None    => ()
     }
 }
 

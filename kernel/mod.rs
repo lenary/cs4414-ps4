@@ -12,6 +12,7 @@ pub mod ptr;
 pub mod memory;
 pub mod sgash;
 pub mod cstr;
+pub mod kbd;
 
 #[cfg(target_word_size = "32")]
 pub mod rt;
@@ -41,7 +42,8 @@ pub fn main() {
     table.load();
     drivers::init();
     unsafe {
-        drivers::keydown = Some(sgash::parsekey);
+        drivers::uart0_rec = Some(sgash::parsekey);
+        drivers::kmi0_rec = Some(sgash::from_keyboard);
         io::init(640, 480);
     }
 }

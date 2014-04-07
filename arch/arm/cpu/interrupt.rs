@@ -1,10 +1,21 @@
 use core::mem::{volatile_store, transmute};
 use core::ptr::offset;
 
-use platform::io;
+use super::{uart, kmi};
 
-static VIC_INT_ENABLE: *mut u32 = (0x10140000 + 0x010) as *mut u32;
-static UART0_IRQ: u8 = 12;
+#[inline]
+static PIC_ADDR: u32 = 0x10140000 as u32;
+pub static PIC_INT_STATUS:      *u32 = (PIC_ADDR + 0x00) as *u32;
+pub static PIC_INT_ENABLE:  *mut u32 = (PIC_ADDR + 0x10) as *mut u32;
+
+pub static SIC_INT: u32  = 1 << 31;
+
+#[inline]
+static SIC_ADDR: u32 = 0x10003000 as u32;
+pub static SIC_INT_STATUS:    *u32 = (SIC_ADDR + 0x00) as *u32;
+pub static SIC_INT_ENSET: *mut u32 = (SIC_ADDR + 0x08) as *mut u32;
+pub static SIC_INT_ENCLR: *mut u32 = (SIC_ADDR + 0x0C) as *mut u32;
+
 static VT: *u32 = 0 as *u32;
 
 #[repr(u8)]
@@ -73,14 +84,17 @@ impl Table {
               mov sp, r2"
             ::: "r0", "r1", "r2", "cpsr");
 
-            // enable UART0 IRQ [4]
-            *VIC_INT_ENABLE = 1 << UART0_IRQ;
-            // enable RXIM interrupt
-            /*
-             * See
-             * http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0183f/I54603.html
-             */
-            *io::UART0_IMSC = 1 << 4;
+            // enable UART and SIC on PIC
+            volatile_store(PIC_INT_ENABLE, 0 | uart::UART0_INT | SIC_INT);
+
+            // enable RXIM interrupt for UART0
+            // http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0183f/I54603.html
+            volatile_store(uart::UART0_IMSC, 0 | uart::UART0_RXIM);
+
+            // enable KMI0 on SIC
+            volatile_store(SIC_INT_ENSET, 0 | kmi::KMI0_INT);
+            // enable RX interrupts from KMI0
+            volatile_store(kmi::KMI0_CR, 0 | kmi::KMI0_ENABLE | kmi::KMI0_RXIM);
         }
     }
 }
