@@ -10,16 +10,11 @@ use super::super::platform::*;
 use kernel::memory::Allocator;
 
 static PROMPT: &'static str = &"sgash> ";
+static UNRECOGNIZED: &'static str = &"Err: Unrecognized command\n";
 static PROMPT_COLOR: u32 = 0xFFAF00;
 static mut count: uint = 0;
 
 static mut buffer: cstr = cstr {
-    p: 0 as *mut u8,
-    p_cstr_i: 0,
-    size: 0,
-};
-
-static mut history: cstr = cstr {
     p: 0 as *mut u8,
     p_cstr_i: 0,
     size: 0,
@@ -116,10 +111,10 @@ pub unsafe fn parsekey(x: char) {
             backspace();
         }
         _ =>  {
-            buffer.add_u8(x);
             if io::CURSOR_X < io::SCREEN_WIDTH-io::CURSOR_WIDTH {
                 putchar(x as char);
                 drawchar(x as char);
+                buffer.add_u8(x);
             }
         }
     }
@@ -130,22 +125,24 @@ pub unsafe fn parse_buffer() {
     buffer.map(putchar);
     buffer.map(drawchar);
     showstr(&"\n");
-    if buffer.streq(&"history") {
-        history.map(drawchar);
-        history.map(putchar);
-    }
-    else {
-        let nhistory = history.join(buffer);
-        history = nhistory;
-        heap.free(history.p);
-        history.add_char('\n');
-    }
     let (command, args) = buffer.split(' ');
     if command.streq(&"echo") {
         args.map(drawchar);
         args.map(putchar);
         showstr(&"\n");
     }
+    else if command.streq(&"cat") { }
+    else if command.streq(&"cd") { }
+    else if command.streq(&"rm") { }
+    else if command.streq(&"ls") { }
+    else if command.streq(&"mkdir") { }
+    else if command.streq(&"pwd") { }
+    else if command.streq(&"wr") { }
+    else {
+        showstr(UNRECOGNIZED);
+    }
+    command.destroy();
+    args.destroy();
 }
 
 pub unsafe fn screen() {
@@ -194,7 +191,6 @@ pub unsafe fn screen() {
 
 pub unsafe fn init() {
     buffer = cstr::new();
-    history = cstr::news(512);
     screen();
     prompt();
 }

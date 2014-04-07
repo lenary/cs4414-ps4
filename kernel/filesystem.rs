@@ -108,7 +108,6 @@ impl Node {
     fn is_dummy(&self: Node) -> bool {
         self.kind == Dummy;
     }
-
 }
 
 // impl Dir {    
@@ -128,7 +127,6 @@ impl Node {
 //     Nil //end of list
 // }
 
-
 // impl List<Node> { 
 //     fn new() -> List<Node> { 
 //         let mut list = List { 
@@ -138,7 +136,7 @@ impl Node {
 //     }
     
 //     fn insert(pointer: Node, data: cstr) -> Option<Node> {
-//         while (pointer.next != None) {
+//         while (!pointer.next.is_none()) {
 //             pointer = pointer.next;
 //         }
 //         pointer = pointer.next;
@@ -149,7 +147,7 @@ impl Node {
 //     fn find_str (pointer: Node, key: cstr) -> bool {
 //         pointer = pointer.next; //dummy node is first
 
-//         while (pointer != None) {
+//         while (!pointer.is_none()) {
 //             if (pointer.data == key) {
 //                 return true;
 //             }
@@ -159,10 +157,10 @@ impl Node {
 //     }
 
 //     fn delete(pointer: Node, data: cstr) {
-//         while (pointer.next != None && (pointer.next).data != data) {
+//         while (!pointer.next.is_none() && (pointer.next).data != data) {
 //             pointer = pointer.next;
 //         }
-//         if (pointer.next == None) {
+//         if (pointer.next.is_none()) {
 
 //             //HANDLE IF NOT IN LIST
 //         }
@@ -226,17 +224,14 @@ impl Node {
 //             putstr(file.name);
 //             drawstr(file.name);
 //         }
-
 //         for (dir : directory) {
 //             putstr(dir.dir_name);
 //             drawstr(dir.dir_name);
 //         }
-
 //     }
     
 //     // creates a directory with the specified name under the given parent directory
 //     pub unsafe fn create_directory(parent, name) {
-
 //     }
 
 //     //deletes the given directory if and only if it is empty
@@ -245,9 +240,7 @@ impl Node {
 //         if (dir.is_empty() == true) {
 //             //then remove
 //         }
-
 //     }
-
 //     //gets the directory with the given name belonging to the specified parent
 //     pub unsafe fn get_directory(parent, name) {
  

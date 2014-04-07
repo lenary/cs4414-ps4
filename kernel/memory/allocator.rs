@@ -53,14 +53,18 @@ impl BitvTrait for Bitv {
     fn get(&self, i: uint) -> Node {
         let w = i / 16;
         let b = (i % 16) * 2;
-        unsafe { transmute(((*self.storage)[w] as uint >> b) as u8 & 3) }
+        unsafe { 
+            transmute(((*self.storage)[w] as uint >> b) as u8 & 3)
+        }
     }
 
     #[inline]
     fn set(&self, i: uint, x: Node) {
         let w = i / 16;
         let b = (i % 16) * 2;
-        unsafe { (*self.storage)[w] = (((*self.storage)[w] & !(3 << b)) | (x as u32 << b)); }
+        unsafe { 
+            (*self.storage)[w] = (((*self.storage)[w] & !(3 << b)) | (x as u32 << b));
+        }
     }
 
     #[inline]
@@ -99,12 +103,16 @@ impl BuddyAlloc {
         /* } */
     }
 
+    fn lg2_size(self, size: uint) -> uint {
+        32 - unsafe { ctlz32(size as i32 - 1) } as uint
+    }
+
     fn alloc(&mut self, mut size: uint) -> (uint, uint) {
         if size == 0 {
             size = 1;
         }
         // smallest power of 2 >= size
-        let lg2_size = 32 - unsafe { ctlz32(size as i32 - 1) } as uint;
+        let lg2_size = self.lg2_size(size);
 
         let mut index = 0; // points to current tree node
         let mut level = self.order; // current height
@@ -114,7 +122,6 @@ impl BuddyAlloc {
                 (UNUSED, true) => {
                     // Found appropriate unused node
                     self.tree.set(index, USED); // use
-
                     let mut parent = index;
                     loop {
                         let buddy = parent - 1 + (parent & 1) * 2;
@@ -157,7 +164,7 @@ impl BuddyAlloc {
 
                     if index == 0 {
                         // out of memory -- back at tree's root after traversal
-			out_of_memory();
+                    out_of_memory();
                         return (0, 0);
                     }
 
@@ -171,11 +178,41 @@ impl BuddyAlloc {
         let mut length = 1 << self.order;
         let mut left = 0;
         let mut index = 0;
-
         loop {
             match self.tree.get(index) {
-                UNUSED => return,
-                USED => self.tree.set(index, UNUSED),
+                UNUSED => { 
+                    return
+                },
+                USED => { 
+                    // Free *this* block.
+                    self.tree.set(index, UNUSED);
+                    // Check for buddy block to free.
+                    let mut parent = index;
+                    loop {
+                        let buddy = parent - 1 + (parent & 1) * 2;
+                        match self.tree.get(buddy) {
+                            UNUSED if parent > 0 => {
+                                // Go up one, free the parent, check the
+                                // parent's buddy. Repeat until we don't have
+                                // an empty split block above us.
+                                parent = (parent + 1) / 2 - 1;
+                                match self.tree.get(parent) {
+                                    FULL if parent > 0 => {
+                                        self.tree.set(parent, UNUSED);
+                                    }
+                                    _ => {
+                                        break;
+                                    }
+                                }
+                            }
+                            SPLIT | USED if parent > 0 => {
+                                parent = (parent + 1) / 2 - 1;
+                                self.tree.set(parent, SPLIT);
+                            }
+                            _ => break
+                        }
+                    }
+                },
                 _ => {
                     length /= 2;
                     if offset < left + length {
@@ -197,10 +234,6 @@ impl Allocator for Alloc {
         unsafe {
             let roffset = mut_offset(self.base, (offset << self.el_size) as int);
             let rsize = size << self.el_size;
-            //sgash::putchar('o');
-            //sgash::putnum(roffset as uint, 0);
-            //sgash::putchar('s');
-            //sgash::putnum(rsize as uint, 0);
             return (roffset, rsize)
         }
     }
