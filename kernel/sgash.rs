@@ -100,7 +100,7 @@ pub unsafe fn parsekey(x: char) {
             prompt();
             buffer.reset();
         }
-        127 =>  {
+        8 | 127 =>  {
             putchar('');
             putchar(' ');
             putchar('');
