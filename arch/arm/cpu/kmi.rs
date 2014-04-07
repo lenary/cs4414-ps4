@@ -10,4 +10,4 @@ pub static KMI0_RXIM:   u8 = 1 << 4;
 
 /* http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0143c/i1008380.html */
 pub static KMI0_CR: *mut u8 = (KMI0 + 0x00) as *mut u8;
-pub static KMI0_DR: *mut u8 = (KMI0 + 0x08) as     *u8;
+pub static KMI0_DR:     *u8 = (KMI0 + 0x08) as     *u8;

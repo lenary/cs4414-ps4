@@ -27,7 +27,7 @@ pub unsafe fn handle_irq() {
 
     if ((pic_status & uart::UART0_INT) != 0) {
         uart0_rec.map(|f| {
-            let x = volatile_load(uart::UART0_DR);
+            let x = volatile_load(uart::UART0_DR as *char);
             f(x)
         });
     }
