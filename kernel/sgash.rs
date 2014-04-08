@@ -11,7 +11,7 @@ use super::super::platform::*;
 use super::super::platform::cpu::uart;
 use kernel::memory::Allocator;
 
-use commands;
+//use commands;
 
 static PROMPT: &'static str = &"sgash> ";
 static UNRECOGNIZED: &'static str = &"Err: Unrecognized command\n";
