@@ -5,8 +5,6 @@ use core::str::*;
 use core::option::{Some, Option, None}; // Match statement
 use core::iter::Iterator;
 use kernel::*;
-use core::mem::transmute;
-use core::container;
 use super::super::platform::*;
 use kernel::memory::Allocator;
 
