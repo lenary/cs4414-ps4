@@ -15,10 +15,10 @@ pub fn init() {
 }
 
 // A pointer to a rust function for dealing with UART0 Data
-pub static mut uart0_rec: Option<extern unsafe fn(char)> = None;
+pub static mut uart0_rec: Option<unsafe fn(char)> = None;
 
 // A pointer to a rust function for dealing with KMI0 Data (PS/2 Keyboard)
-pub static mut kmi0_rec:  Option<extern unsafe fn(u8)> = None;
+pub static mut kmi0_rec:  Option<unsafe fn(u8)> = None;
 
 // this fires on all Interrupts; so we need to check which interrupt triggered it,
 #[no_mangle]

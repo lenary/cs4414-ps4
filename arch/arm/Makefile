@@ -4,7 +4,7 @@ TARGET := arm-linux-noeabi
 GCC_PREFIX := $(GCC_PREFIX)arm-none-eabi-
 
 RUSTC := $(RUST_ROOT)/bin/rustc
-RUSTCFLAGS := -O --target $(TARGET) -Z no-landing-pads -Z debug-info -Z extra-debug-info
+RUSTCFLAGS := --debuginfo 1 -O --target $(TARGET) -Z no-landing-pads
 
 AS := $(GCC_PREFIX)as
 LD := $(GCC_PREFIX)ld
@@ -18,7 +18,8 @@ QEMU := qemu-system-arm
 QEMUFLAGS := -M versatilepb -m 32M -serial stdio
 
 BDIR := ./boot
-CORE_LIB := ../../rust-core/core/lib.rs
+CORE_DIR := ../../rust-core
+CORE_LIB := $(CORE_DIR)/core/lib.rs
 LCORE := $(BDIR)/$(shell $(RUSTC) --crate-file-name $(CORE_LIB))
 OBJS := $(BDIR)/loader.o $(BDIR)/aeabi_runtime.o $(BDIR)/main.o $(BDIR)/core.o
 LINK := $(BDIR)/linker.ld $(OBJS)
@@ -36,14 +37,15 @@ all: $(BDIR)/kernel.bin
 
 # Library rust-core
 $(LCORE):
-	$(RUSTC) $(RUSTCFLAGS) --dep-info $(@D)/core.d $(CORE_LIB) --out-dir $(BDIR)
+	$(RUSTC) $(RUSTCFLAGS) --cfg libc $(CORE_DIR)/core/lib.rs --out-dir $(BDIR)
+	$(RUSTC) $(RUSTCFLAGS) --dep-info $(@D)/core.d $(CORE_LIB) --crate-type=lib --emit=bc  -C passes=inline --out-dir $(BDIR)
 
 $(BDIR)/core.bc: $(LCORE)
 	cd $(@D); ar -x $(<F) $(@F)
 
 # Compile rustboot
-$(BDIR)/main.bc: ../../lib.rs $(MODS) $(LCORE)
-	$(RUSTC) $(RUSTCFLAGS) --dep-info $(@D)/main.d -L $(BDIR) --emit-llvm ../../lib.rs --out-dir $(BDIR)
+$(BDIR)/main.bc:  $(LCORE) ../../lib.rs $(MODS)
+	$(RUSTC) $(RUSTCFLAGS) --emit=bc --dep-info $(@D)/main.d -L $(CORE_DIR) -L $(BDIR) ../../lib.rs --out-dir $(BDIR)
 
 %.s: %.bc
 	$(LLC) $(LLCFLAGS) $^ -o $@

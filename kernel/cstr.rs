@@ -1,5 +1,5 @@
 /* kernel::cstr.rs */
-#[allow(unused_imports)];
+#![allow(unused_imports)]
 use core::*;
 use core::str::*;
 use core::option::{Some, Option, None}; // Match statement
@@ -11,25 +11,25 @@ use kernel::memory::Allocator;
 pub static DEFAULT_STRLEN: uint = 256;
 pub static mut first: bool = true;
 
-pub struct cstr {
+pub struct Cstr {
     p: *mut u8,
     p_cstr_i: uint,
     size: uint
 }
 
-impl cstr {
-    pub fn new() -> cstr {
+impl Cstr {
+    pub fn new() -> Cstr {
         unsafe {
-            cstr::news(DEFAULT_STRLEN)
+            Cstr::news(DEFAULT_STRLEN)
         }
     }
 
-    pub unsafe fn news(size: uint) -> cstr {
+    pub unsafe fn news(size: uint) -> Cstr {
         // Sometimes this doesn't allocate enough memory and gets stuck...
         if first { let (_, _) = heap.alloc(size); }
         first = false;
         let (x, y) = heap.alloc(size);
-        let this = cstr {
+        let this = Cstr {
             p: x,
             p_cstr_i: 0,
             size: y
@@ -38,8 +38,8 @@ impl cstr {
         this
     }
 
-    pub fn from_str(s: &str) -> cstr {
-        let mut this = cstr::new();
+    pub fn from_str(s: &str) -> Cstr {
+        let mut this = Cstr::new();
         for c in slice::iter(as_bytes(s)) {
             this.add_u8(*c);
         };
@@ -60,19 +60,19 @@ impl cstr {
         }
     }
 
-    pub unsafe fn join(&self, other: cstr) -> cstr {
+    pub unsafe fn join(&self, other: Cstr) -> Cstr {
         let mut len = DEFAULT_STRLEN;
         while len < self.len() + other.len() {
             len += DEFAULT_STRLEN;
         }
-        let mut new = cstr::news(len);
+        let mut new = Cstr::news(len);
         self.map(|c| { new.add_char(c); } );
         other.map(|c| { new.add_char(c); } );
         new
     }
 
-    pub unsafe fn trim(&mut self) -> cstr {
-        let mut new = cstr::new();
+    pub unsafe fn trim(&mut self) -> Cstr {
+        let mut new = Cstr::new();
         if self.len() == 0 || self.size > new.size {
             return new;
         }
@@ -105,9 +105,9 @@ impl cstr {
         return new;
     }
 
-    pub unsafe fn clone(&mut self) -> cstr {
+    pub unsafe fn clone(&mut self) -> Cstr {
         let mut ind: uint = 0;
-        let mut s = cstr::news(self.size);
+        let mut s = Cstr::news(self.size);
         loop {
             if (self.len() == 0 || ind == self.len()) {
                 return s;
@@ -174,7 +174,7 @@ impl cstr {
         *(self.p as *mut char) = '\0';
     }
 
-    pub unsafe fn eq(&self, other: &cstr) -> bool {
+    pub unsafe fn eq(&self, other: &Cstr) -> bool {
         if (self.len() != other.len()) { return false; }
         else {
             let mut x = 0;
@@ -202,14 +202,14 @@ impl cstr {
     }
 
     #[allow(dead_code)]
-    pub unsafe fn split(&self, delim: char) -> (cstr, cstr) {
+    pub unsafe fn split(&self, delim: char) -> (Cstr, Cstr) {
         let mut i = 0;
-        let mut beg = cstr::news(self.size);
-        let mut end = cstr::news(self.size);
+        let mut beg = Cstr::news(self.size);
+        let mut end = Cstr::news(self.size);
         self.map(|c| {beg.add_char(c);});
         let mut found = false;
         while i < self.len() && !found {
-            if (!found && beg.get_char(i) as u8 == delim as u8) {
+            if !found && beg.get_char(i) as u8 == delim as u8 {
                 found = true;
                 match beg.get_p(i) {
                     Some(p) => *(p as *mut char) = '\0',

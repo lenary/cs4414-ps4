@@ -1,16 +1,15 @@
 /* main.rs */
 
-#[crate_id = "main#0.1"];
-#[comment = "ironkernel"];
-#[license = "MIT"];
-#[crate_type = "lib"];
+#![crate_id = "main#0.1"]
+#![comment = "ironkernel"]
+#![license = "MIT"]
+#![crate_type = "lib"]
 // Forked from pczarn/rustboot
-#[no_std];
-#[feature(asm, globs, macro_rules)];
+#![no_std]
+#![feature(asm, globs, macro_rules)]
 
-#[allow(attribute_usage)];
-#[allow(dead_code)];
-extern mod core;
+#![allow(attribute_usage)]
+extern crate core;
 
 #[cfg(target_arch = "arm")]
 pub use support::{memcpy, memmove};

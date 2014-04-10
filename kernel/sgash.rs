@@ -1,12 +1,12 @@
 /* kernel::sgash.rs */
-#[allow(unused_imports)];
+#![allow(unused_imports)]
 use core::*;
 use core::str::*;
 use core::option::{Some, Option, None};
 use core::mem::volatile_store;
 use core::iter::Iterator;
 use kernel::*;
-use kernel::cstr::cstr;
+use kernel::cstr::Cstr;
 use super::super::platform::*;
 use super::super::platform::cpu::uart;
 use kernel::memory::Allocator;
@@ -18,7 +18,7 @@ static UNRECOGNIZED: &'static str = &"Err: Unrecognized command\n";
 static PROMPT_COLOR: u32 = 0xFFAF00;
 static mut count: uint = 0;
 
-static mut buffer: cstr = cstr {
+static mut buffer: Cstr = Cstr {
     p: 0 as *mut u8,
     p_cstr_i: 0,
     size: 0,
@@ -30,7 +30,7 @@ pub fn putnum(x: uint, max: uint) {
     if i == 0 {
         i = 1000000;
     }
-    while(i > 0) {
+    while i > 0 {
         // Get the offset from each decimal point up to a certain value
         putchar(((((x / i) % 10) as u8) + ('0' as u8)) as char);
         i /= 10;
@@ -71,7 +71,7 @@ unsafe fn drawchar(x: char) {
         io::CURSOR_Y += io::CURSOR_HEIGHT;
         io::CURSOR_X = 0u32;
     } else {
-        if (((x as u8) as uint) >= 32 && ((x as u8) as uint) <= 125) {
+        if ((x as u8) as uint) >= 32 && ((x as u8) as uint) <= 125 {
             io::draw_char(x);
             io::CURSOR_X += io::CURSOR_WIDTH;
         }
@@ -83,7 +83,7 @@ unsafe fn drawchar(x: char) {
 
 unsafe fn backspace() {
     io::restore();
-    if (io::CURSOR_X >= io::CURSOR_WIDTH) {
+    if io::CURSOR_X >= io::CURSOR_WIDTH {
         io::CURSOR_X -= io::CURSOR_WIDTH;
         io::draw_char(' ');
     }
@@ -129,11 +129,11 @@ pub unsafe fn from_keyboard(x: u8) {
 pub unsafe fn parse_buffer() {
     showstr(&"\n");
     buffer.map(putchar);
-    buffer.map(drawchar);
+    buffer.map(|c| drawchar(c));
     showstr(&"\n");
     let (command, args) = buffer.split(' ');
     if command.streq(&"echo") {
-        args.map(drawchar);
+        args.map(|c| drawchar(c));
         args.map(putchar);
         showstr(&"\n");
     }
@@ -215,7 +215,7 @@ pub unsafe fn screen() {
 }
 
 pub unsafe fn init() {
-    buffer = cstr::new();
+    buffer = Cstr::new();
     screen();
     prompt();
 }

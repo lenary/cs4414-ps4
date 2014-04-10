@@ -63,7 +63,7 @@ impl BitvTrait for Bitv {
         let w = i / 16;
         let b = (i % 16) * 2;
         unsafe { 
-            (*self.storage)[w] = (((*self.storage)[w] & !(3 << b)) | (x as u32 << b));
+            (*self.storage)[w] = ((*self.storage)[w] & !(3 << b)) | (x as u32 << b);
         }
     }
 

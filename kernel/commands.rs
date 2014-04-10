@@ -1,8 +1,8 @@
 use core::option::{Some, Option, None};
-use kernel::cstr::cstr;
+use kernel::cstr::Cstr;
 
+/*
 pub static mut filesystem: Option<fs> = None;
-
 pub struct fs {
     head: ~inode,
     current: Option<*inode>,
@@ -14,7 +14,6 @@ impl fs {
             head: ~inode::new(),
             current: None,
         };
-        nfs.current = nfs.head.child;
         nfs
     }
 
@@ -24,12 +23,12 @@ impl fs {
 }
 
 pub struct inode {
-    name: Option<cstr>,
-    parent: Option<*inode>,
-    child: Option<*inode>,
-    left: Option<*inode>,
-    right: Option<*inode>,
-    data: Option<cstr>,
+    name: Option<*mut Cstr>,
+    parent: Option<*mut inode>,
+    child: Option<*mut inode>,
+    left: Option<*mut inode>,
+    right: Option<*mut inode>,
+    data: Option<*mut Cstr>,
 }
 
 impl inode {
@@ -55,10 +54,10 @@ impl inode {
         }
     }
 
-    unsafe fn new_dir(name: cstr, link: *inode) -> inode {
+    unsafe fn new_dir(name: Cstr, link: *inode) -> inode {
         inode {
             parent: None,
-            child: Some(~inode::new_dhead()),
+            child: Some(inode::new_dhead() as *u32),
             left: Some(link),
             right: None,
             name: None,
@@ -66,15 +65,15 @@ impl inode {
         }
     }
 
-    pub fn is_dir(&self) {
+    pub fn is_dir(&self) -> bool {
         self.child.is_some()
     }
 
-    pub fn is_dhead(&self) {
+    pub fn is_dhead(&self) -> bool {
         self.left.is_none()
     }
     
-    pub fn is_file(&self) {
+    pub fn is_file(&self) -> bool {
         // Nothing will be files for 1st prototype
         self.data.is_some()
     }
@@ -84,36 +83,32 @@ impl inode {
     }
 }
 
-static mut curr_dir: cstr = cstr {
+static mut curr_dir: Cstr = Cstr {
     p: 0 as *mut u8,
     p_cstr_i: 0,
     size: 0,
 };
-
-pub fn ls(dirname: cstr) {
+*/
+pub fn ls(dirname: Cstr) {
 }
 
-pub fn cat(filename: cstr) {
+pub fn cat(filename: Cstr) {
 }
 
-pub fn cd(newdir: cstr) {
+pub fn cd(newdir: Cstr) {
 }
 
-pub fn rm(filename: cstr) {
+pub fn rm(filename: Cstr) {
 }
 
-pub fn mkdir(dirname: cstr) {
+pub fn mkdir(dirname: Cstr) {
 }
 
 pub fn pwd() {
 }
 
-pub fn mv(from: cstr, to: cstr) {
+pub fn mv(from: Cstr, to: Cstr) {
 }
 
-pub fn wr(filename: cstr, string: cstr) {
-}
-
-pub unsafe fn init() {
-    filesystem = fs::new();
+pub fn wr(filename: Cstr, string: Cstr) {
 }
