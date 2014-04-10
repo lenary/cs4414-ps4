@@ -132,6 +132,7 @@ pub unsafe fn parse_buffer() {
     buffer.map(|c| drawchar(c));
     showstr(&"\n");
     let (command, args) = buffer.split(' ');
+    /* TODO: this Worked in Rust 0.9
     if command.streq(&"echo") {
         args.map(|c| drawchar(c));
         args.map(putchar);
@@ -166,6 +167,7 @@ pub unsafe fn parse_buffer() {
     else {
         showstr(UNRECOGNIZED);
     }
+    */
     command.destroy();
     args.destroy();
 }

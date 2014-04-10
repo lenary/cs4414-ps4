@@ -5,6 +5,8 @@ use core::str::*;
 use core::option::{Some, Option, None}; // Match statement
 use core::iter::Iterator;
 use kernel::*;
+use core::mem::transmute;
+use core::container;
 use super::super::platform::*;
 use kernel::memory::Allocator;
 
@@ -54,10 +56,12 @@ impl Cstr {
     
     pub fn map(&self, f: |char|) {
         let mut i = 0;
+        /*
         while i < self.len() && self.get_char(i) != '\0' {
             f(self.get_char(i));
             i += 1;
         }
+        */
     }
 
     pub unsafe fn join(&self, other: Cstr) -> Cstr {
@@ -188,17 +192,6 @@ impl Cstr {
             }
             true
         }
-    }
-
-    pub unsafe fn streq(&self, other: &str) -> bool {
-        let mut i = 0;
-        for c in slice::iter(as_bytes(other)) {
-            if i > self.len() || *c != (self.get_char(i) as u8) {
-                return false;
-            }
-            i += 1;
-        };
-        i == self.len()
     }
 
     #[allow(dead_code)]
