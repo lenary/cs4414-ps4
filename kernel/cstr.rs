@@ -56,12 +56,10 @@ impl Cstr {
     
     pub fn map(&self, f: |char|) {
         let mut i = 0;
-        /*
         while i < self.len() && self.get_char(i) != '\0' {
             f(self.get_char(i));
             i += 1;
         }
-        */
     }
 
     pub unsafe fn join(&self, other: Cstr) -> Cstr {
