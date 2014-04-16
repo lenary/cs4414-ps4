@@ -7,6 +7,7 @@ use core::iter::Iterator;
 use kernel::*;
 use super::super::platform::*;
 use kernel::memory::Allocator;
+use kernel::sgash::putnum;
 
 pub static DEFAULT_STRLEN: uint = 256;
 pub static mut first: bool = true;
@@ -25,8 +26,12 @@ impl Cstr {
     }
 
     pub unsafe fn news(size: uint) -> Cstr {
-        // Sometimes this doesn't allocate enough memory and gets stuck...
-        if first { let (_, _) = heap.alloc(size); }
+        if first { 
+            // Why the hell does this fix anything?
+            // Why do we have to do it twice since Rust 0.10?
+            let (_, _) = heap.alloc(size); 
+            let (_, _) = heap.alloc(size); 
+        }
         first = false;
         let (x, y) = heap.alloc(size);
         let this = Cstr {
@@ -175,19 +180,26 @@ impl Cstr {
     }
 
     pub unsafe fn eq(&self, other: &Cstr) -> bool {
-        if (self.len() != other.len()) { return false; }
+        if (self.len() != other.len()) {
+            return false;
+        }
         else {
-            let mut x = 0;
-            let mut selfp: uint = self.p as uint;
-            let mut otherp: uint = other.p as uint;
-            while x < self.len() {
-                if (*(selfp as *char) != *(otherp as *char)) { return false; }
-                selfp += 1;
-                otherp += 1;
-                x += 1;
+            let mut i = 0;
+            while i < self.len() {
+                if self.get_char(i) != other.get_char(i) {
+                    return false;
+                }
+                i += 1;
             }
             true
         }
+    }
+    
+    pub unsafe fn streq(&self, s: &str) -> bool {
+        let other: Cstr = Cstr::from_str(s);
+        let result: bool = self.eq(&other);
+        other.destroy();
+        result
     }
 
     #[allow(dead_code)]

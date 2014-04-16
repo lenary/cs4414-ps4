@@ -1,5 +1,6 @@
 use core::option::{Some, Option, None};
 use kernel::cstr::Cstr;
+use kernel::sgash::drawstr;
 
 /*
 pub static mut filesystem: Option<fs> = None;
@@ -65,20 +66,20 @@ impl inode {
         }
     }
 
-    pub fn is_dir(&self) -> bool {
+    pub unsafe fn is_dir(&self) -> bool {
         self.child.is_some()
     }
 
-    pub fn is_dhead(&self) -> bool {
+    pub unsafe fn is_dhead(&self) -> bool {
         self.left.is_none()
     }
     
-    pub fn is_file(&self) -> bool {
+    pub unsafe fn is_file(&self) -> bool {
         // Nothing will be files for 1st prototype
         self.data.is_some()
     }
 
-    pub fn unlink() {
+    pub unsafe fn unlink() {
         // Does nothing yet
     }
 }
@@ -89,26 +90,31 @@ static mut curr_dir: Cstr = Cstr {
     size: 0,
 };
 */
-pub fn ls(dirname: Cstr) {
+pub unsafe fn ls(dirname: Cstr) {
+    drawstr(&". rusty\n");
 }
 
-pub fn cat(filename: Cstr) {
+pub unsafe fn cat(filename: Cstr) {
+    if filename.streq(&"rusty") {
+        drawstr(&"kernel\n");
+    }
 }
 
-pub fn cd(newdir: Cstr) {
+pub unsafe fn cd(newdir: Cstr) {
 }
 
-pub fn rm(filename: Cstr) {
+pub unsafe fn rm(filename: Cstr) {
 }
 
-pub fn mkdir(dirname: Cstr) {
+pub unsafe fn mkdir(dirname: Cstr) {
 }
 
-pub fn pwd() {
+pub unsafe fn pwd() {
+    drawstr(&"/\n");
 }
 
-pub fn mv(from: Cstr, to: Cstr) {
+pub unsafe fn mv(from: Cstr, to: Cstr) {
 }
 
-pub fn wr(filename: Cstr, string: Cstr) {
+pub unsafe fn wr(filename: Cstr, string: Cstr) {
 }
