@@ -6,7 +6,7 @@
  * udivmoddi4
  */
 
-#[allow(ctypes)];
+#![allow(ctypes)]
 
 use core::i32::{ctlz32, cttz32};
 use core::mem::{transmute, size_of};

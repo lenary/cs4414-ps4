@@ -1,4 +1,4 @@
-#[allow(unused_imports)];
+#![allow(unused_imports)]
 
 use core::option::{Option, Some, None};
 use core::fail::out_of_memory;
